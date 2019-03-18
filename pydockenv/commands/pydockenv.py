@@ -95,29 +95,8 @@ def _set_conf(env_name, conf):
         return json.dump(status, fout)
 
 
-# This is really hacky... this should be changed using env vars or maybe daemon
-# manager
-# /-----\
-def _get_current_status():
-    if not status_file_path.exists():
-        return {}
-
-    with open(str(status_file_path)) as fin:
-        return json.load(fin)
-
-
-def _set_current_env(env_name):
-    status = _get_current_status()
-    status[os.environ['SHELL_ID']] = env_name
-
-    os.makedirs(str(conf_file_dir), exist_ok=True)
-    with open(str(status_file_path), 'w') as fout:
-        return json.dump(status, fout)
-
-
 def _get_current_env():
-    return _get_current_status().get(os.environ['SHELL_ID'])
-# \-----/
+    return os.environ.get('PYDOCKENV')
 
 
 @cli.command()
@@ -127,7 +106,7 @@ def status():
         click.echo('No active environment')
     else:
         click.echo(
-            f'Active environment: {current_env[len(containers_prefix):]}')
+            f'Active environment: {current_env}')
 
 
 @cli.command()
@@ -140,7 +119,6 @@ def activate(name):
         click.echo(f'Environment {name} not found, exiting...')
     else:
         container.start()
-        _set_current_env(containers_prefix + name)
         click.echo('Environment activated!')
 
 
@@ -149,12 +127,11 @@ def deactivate():
     click.echo('Deactivating current environment...')
     current_env = _get_current_env()
     try:
-        container = client.containers.get(current_env)
+        container = client.containers.get(containers_prefix + current_env)
     except docker.errors.ImageNotFound:
         click.echo(f'Environment {current_env} not found, exiting...')
     else:
         container.stop()
-        _set_current_env('')
         click.echo('Environment deactivated!')
 
 
@@ -201,13 +178,13 @@ def list_packages():
 def _run(*args):
     current_env = _get_current_env()
     try:
-        client.containers.get(current_env)
+        client.containers.get(containers_prefix + current_env)
     except docker.errors.ImageNotFound:
         click.echo(f'Container {current_env} not found, exiting...')
         raise
     else:
         # This cannot be done with docker python sdk
-        host_base_wd = _get_conf(current_env)['workdir']
+        host_base_wd = _get_conf(containers_prefix + current_env)['workdir']
         current_wd = os.getcwd()
         if not current_wd.startswith(host_base_wd):
             raise RuntimeError(f'Cannot run files outside of {host_base_wd}')
@@ -215,7 +192,8 @@ def _run(*args):
         relative_wd = current_wd[len(host_base_wd):]
         guest_wd = f'/usr/src{relative_wd}'
         args = ['docker', 'exec',
-                '-w', guest_wd, '-i', '-t', current_env] + list(args)
+                '-w', guest_wd, '-i', '-t',
+                (containers_prefix + current_env)] + list(args)
         subprocess.check_call(args)
 
 
