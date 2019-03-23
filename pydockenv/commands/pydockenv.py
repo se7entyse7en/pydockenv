@@ -145,6 +145,17 @@ def shell(args):
         click.echo('Exited!')
 
 
+@cli.command()
+@click.argument('cmd')
+@click.argument('args', nargs=-1)
+def run(cmd, args):
+    click.echo('Running...')
+    try:
+        _run(cmd, *args)
+    finally:
+        click.echo('Exited!')
+
+
 # Using `pip` for now
 @cli.command()
 @click.argument('package', required=False)
