@@ -29,11 +29,31 @@ def create(name, project_dir, version):
     click.echo(f'Creating environment {name} with python version {version}...')
     image_name = f'python:{version}'
     try:
-        client.images.get(image_name)
+        image = client.images.get(image_name)
     except docker.errors.ImageNotFound:
         click.echo(f'Image {image_name} not found, pulling...')
-        client.images.pull('python', tag=version)
+        image = client.images.pull('python', tag=version)
 
+    _create_env(image, name, project_dir)
+
+    click.echo(f'Environment {name} with python version {version} created!')
+
+
+@cli.command()
+@click.argument('name')
+@click.argument('project_dir')
+@click.argument('input_file')
+def load(name, project_dir, input_file):
+    click.echo(f'Loading environment {name} from {input_file}...')
+    with open(input_file, 'rb') as fin:
+        image = client.images.load(fin)[0]
+
+    _create_env(image, name, project_dir)
+
+    click.echo(f'Environment {name} loaded from {input_file}!')
+
+
+def _create_env(image, name, project_dir):
     workdir = os.path.abspath(project_dir)
     mounts = [
         Mount('/usr/src', workdir, type='bind')
@@ -44,10 +64,9 @@ def create(name, project_dir, version):
         'name': containers_prefix + name,
         'mounts': mounts,
     }
-    client.containers.create(f'python:{version}', **kwargs)
+    client.containers.create(image, **kwargs)
 
     _set_conf(containers_prefix + name, {'workdir': workdir})
-    click.echo(f'Environment {name} with python version {version} created!')
 
 
 @cli.command()
