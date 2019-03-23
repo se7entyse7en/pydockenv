@@ -284,6 +284,8 @@ def _run(*args, **kwargs):
         if kwargs.get('ports'):
             port_mappers_containers_names = _run_port_mapper(
                 container, kwargs['ports'])
+        else:
+            port_mappers_containers_names = []
 
         args = (
             ['docker', 'exec', '-w', guest_wd, '-i', '-t'] +
