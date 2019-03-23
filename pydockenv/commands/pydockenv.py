@@ -206,7 +206,8 @@ def _run(*args):
         host_base_wd = _get_conf(containers_prefix + current_env)['workdir']
         current_wd = os.getcwd()
         if not current_wd.startswith(host_base_wd):
-            raise RuntimeError(f'Cannot run files outside of {host_base_wd}')
+            raise RuntimeError(
+                f'Cannot run commands outside of {host_base_wd}')
 
         relative_wd = current_wd[len(host_base_wd):]
         guest_wd = f'/usr/src{relative_wd}'
