@@ -2,6 +2,7 @@ import os
 import subprocess
 import json
 from pathlib import Path
+from itertools import chain
 
 import click
 import docker
@@ -148,10 +149,13 @@ def shell(args):
 @cli.command()
 @click.argument('cmd')
 @click.argument('args', nargs=-1)
-def run(cmd, args):
+@click.option('-e', '--env-var', multiple=True,
+              help='Environment variable to set')
+def run(cmd, args, env_var):
     click.echo('Running...')
+    env_vars = dict(e.split('=') for e in env_var)
     try:
-        _run(cmd, *args)
+        _run(cmd, *args, env_vars=env_vars)
     finally:
         click.echo('Exited!')
 
@@ -194,7 +198,7 @@ def list_packages():
         click.echo('Exited!')
 
 
-def _run(*args):
+def _run(*args, **kwargs):
     current_env = _get_current_env()
     try:
         client.containers.get(containers_prefix + current_env)
@@ -211,9 +215,20 @@ def _run(*args):
 
         relative_wd = current_wd[len(host_base_wd):]
         guest_wd = f'/usr/src{relative_wd}'
-        args = ['docker', 'exec',
-                '-w', guest_wd, '-i', '-t',
-                (containers_prefix + current_env)] + list(args)
+        if kwargs.get('env_vars'):
+            env_vars = list(chain.from_iterable([
+                ['-e', f'{k}={v}']for k, v in kwargs['env_vars'].items()
+            ]))
+        else:
+            env_vars = []
+
+        args = (
+            ['docker', 'exec', '-w', guest_wd, '-i', '-t'] +
+            env_vars +
+            [(containers_prefix + current_env)] +
+            list(args)
+        )
+
         subprocess.check_call(args)
 
 
