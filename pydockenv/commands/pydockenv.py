@@ -151,11 +151,13 @@ def shell(args):
 @click.argument('args', nargs=-1)
 @click.option('-e', '--env-var', multiple=True,
               help='Environment variable to set')
-def run(cmd, args, env_var):
+@click.option('-p', '--port', multiple=True,
+              help='Port to reach')
+def run(cmd, args, env_var, port):
     click.echo('Running...')
     env_vars = dict(e.split('=') for e in env_var)
     try:
-        _run(cmd, *args, env_vars=env_vars)
+        _run(cmd, *args, env_vars=env_vars, ports=list(port))
     finally:
         click.echo('Exited!')
 
@@ -201,7 +203,7 @@ def list_packages():
 def _run(*args, **kwargs):
     current_env = _get_current_env()
     try:
-        client.containers.get(containers_prefix + current_env)
+        container = client.containers.get(containers_prefix + current_env)
     except docker.errors.ImageNotFound:
         click.echo(f'Container {current_env} not found, exiting...')
         raise
@@ -222,6 +224,10 @@ def _run(*args, **kwargs):
         else:
             env_vars = []
 
+        if kwargs.get('ports'):
+            port_mappers_containers_names = _run_port_mapper(
+                container, kwargs['ports'])
+
         args = (
             ['docker', 'exec', '-w', guest_wd, '-i', '-t'] +
             env_vars +
@@ -230,6 +236,32 @@ def _run(*args, **kwargs):
         )
 
         subprocess.check_call(args)
+
+        for container_name in port_mappers_containers_names:
+            container = client.containers.get(container_name)
+            container.stop()
+
+
+def _run_port_mapper(container, ports):
+    guest_ip = container.attrs[
+        'NetworkSettings']['Networks']['bridge']['IPAddress']
+    containers_names = []
+    for port in ports:
+        # TODO: Use a single container for all port mappings instead of
+        # spinning a container for each port
+        name = f'{container.name}_port_mapper_{port}'
+        kwargs = {
+            'command': f'TCP-LISTEN:1234,fork TCP-CONNECT:{guest_ip}:{port}',
+            'ports': {'1234': f'{port}/tcp'},
+            'name': name,
+            'detach': True,
+            'auto_remove': True
+        }
+
+        client.containers.run('alpine/socat', **kwargs)
+        containers_names.append(name)
+
+    return containers_names
 
 
 if __name__ == '__main__':
