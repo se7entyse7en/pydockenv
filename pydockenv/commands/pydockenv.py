@@ -2,6 +2,7 @@ import os
 import subprocess
 import json
 from pathlib import Path
+from itertools import chain
 
 import click
 import docker
@@ -137,10 +138,26 @@ def deactivate():
 
 @cli.command()
 @click.argument('args', nargs=-1)
-def run(args):
+def shell(args):
     click.echo('Running...')
     try:
         _run('python', *args)
+    finally:
+        click.echo('Exited!')
+
+
+@cli.command()
+@click.argument('cmd')
+@click.argument('args', nargs=-1)
+@click.option('-e', '--env-var', multiple=True,
+              help='Environment variable to set')
+@click.option('-p', '--port', multiple=True,
+              help='Port to reach')
+def run(cmd, args, env_var, port):
+    click.echo('Running...')
+    env_vars = dict(e.split('=') for e in env_var)
+    try:
+        _run(cmd, *args, env_vars=env_vars, ports=list(port))
     finally:
         click.echo('Exited!')
 
@@ -183,10 +200,10 @@ def list_packages():
         click.echo('Exited!')
 
 
-def _run(*args):
+def _run(*args, **kwargs):
     current_env = _get_current_env()
     try:
-        client.containers.get(containers_prefix + current_env)
+        container = client.containers.get(containers_prefix + current_env)
     except docker.errors.ImageNotFound:
         click.echo(f'Container {current_env} not found, exiting...')
         raise
@@ -195,14 +212,56 @@ def _run(*args):
         host_base_wd = _get_conf(containers_prefix + current_env)['workdir']
         current_wd = os.getcwd()
         if not current_wd.startswith(host_base_wd):
-            raise RuntimeError(f'Cannot run files outside of {host_base_wd}')
+            raise RuntimeError(
+                f'Cannot run commands outside of {host_base_wd}')
 
         relative_wd = current_wd[len(host_base_wd):]
         guest_wd = f'/usr/src{relative_wd}'
-        args = ['docker', 'exec',
-                '-w', guest_wd, '-i', '-t',
-                (containers_prefix + current_env)] + list(args)
+        if kwargs.get('env_vars'):
+            env_vars = list(chain.from_iterable([
+                ['-e', f'{k}={v}']for k, v in kwargs['env_vars'].items()
+            ]))
+        else:
+            env_vars = []
+
+        if kwargs.get('ports'):
+            port_mappers_containers_names = _run_port_mapper(
+                container, kwargs['ports'])
+
+        args = (
+            ['docker', 'exec', '-w', guest_wd, '-i', '-t'] +
+            env_vars +
+            [(containers_prefix + current_env)] +
+            list(args)
+        )
+
         subprocess.check_call(args)
+
+        for container_name in port_mappers_containers_names:
+            container = client.containers.get(container_name)
+            container.stop()
+
+
+def _run_port_mapper(container, ports):
+    guest_ip = container.attrs[
+        'NetworkSettings']['Networks']['bridge']['IPAddress']
+    containers_names = []
+    for port in ports:
+        # TODO: Use a single container for all port mappings instead of
+        # spinning a container for each port
+        name = f'{container.name}_port_mapper_{port}'
+        kwargs = {
+            'command': f'TCP-LISTEN:1234,fork TCP-CONNECT:{guest_ip}:{port}',
+            'ports': {'1234': f'{port}/tcp'},
+            'name': name,
+            'detach': True,
+            'auto_remove': True
+        }
+
+        client.containers.run('alpine/socat', **kwargs)
+        containers_names.append(name)
+
+    return containers_names
 
 
 if __name__ == '__main__':
