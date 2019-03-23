@@ -137,7 +137,7 @@ def deactivate():
 
 @cli.command()
 @click.argument('args', nargs=-1)
-def run(args):
+def shell(args):
     click.echo('Running...')
     try:
         _run('python', *args)
