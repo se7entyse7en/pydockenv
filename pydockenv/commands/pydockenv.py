@@ -51,6 +51,44 @@ def create(name, project_dir, version):
 
 
 @cli.command()
+@click.option('--output', help='Name of the output file')
+def save(name, output):
+    current_env = _get_current_env()
+    click.echo(f'Saving environment {current_env}...')
+
+    try:
+        container = client.containers.get(containers_prefix + current_env)
+    except docker.errors.ImageNotFound:
+        click.echo(f'Container {current_env} not found, exiting...')
+        raise
+
+    if not name:
+        repository, tag = f'{containers_prefix + current_env}', 'latest'
+    else:
+        repository, tag = name.split(':')
+
+    container.commit(repository=repository, tag=tag)
+    image_name = f'{repository}:{tag}'
+    click.echo(f'Environment {current_env} saved as image {image_name}!')
+    click.echo(f'Saving image {image_name} to {output}...')
+
+    try:
+        image = client.images.get(image_name)
+    except docker.errors.ImageNotFound:
+        raise
+
+    output = output or f'{image_name}.tar.gz'
+    with open(output, 'wb') as fout:
+        for chunk in image.save(named=True):
+            fout.write(chunk)
+
+    click.echo(f'Image {image_name} saved to {output}!')
+    click.echo(f'Removing image {image_name}...')
+    client.images.remove(image_name)
+    click.echo(f'Image {image_name} removed')
+
+
+@cli.command()
 @click.argument('name')
 def remove(name):
     click.echo(f'Removing environment {name}...')
