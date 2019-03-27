@@ -11,14 +11,15 @@ fi
 
 shell_id="$PPID"
 export SHELL_ID=$shell_id
-python $(dirname "$0")/pydockenv/commands/pydockenv.py $@
+pydockenv_entry_point=$(python -c 'from pydockenv.commands import pydockenv; print(pydockenv.__file__)')
+python $pydockenv_entry_point $@
 
 if [ $? -eq 0 ]
 then
-    if [ $cmd = "activate" ]
+    if [ "$cmd" = "activate" ]
     then
         export PYDOCKENV=$2
-    elif [ $cmd = "deactivate" ]
+    elif [ "$cmd" = "deactivate" ]
     then
         export PYDOCKENV=""
     fi
