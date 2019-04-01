@@ -25,6 +25,7 @@ publish-check:
 publish: build publish-check
 	twine check dist/*
 	twine upload --config-file $(TWINE_CONFIG_FILE) --repository $(PYPI_REPOSITORY) dist/*
+	git push origin --tags
 
 bump-major: PART = major
 bump-minor: PART = minor
