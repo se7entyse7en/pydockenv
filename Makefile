@@ -21,10 +21,6 @@ publish-check:
 	fi; \
 
 	git describe --exact-match HEAD
-	@if [[ $$? -ne 0 ]]; then \
-		echo "error: tag not available"; \
-		exit 1; \
-	fi; \
 
 publish: build publish-check
 	twine check dist/*
