@@ -19,8 +19,10 @@ then
     if [ "$cmd" = "activate" ]
     then
         export PYDOCKENV=$2
+        export PS1="($PYDOCKENV) $PS1"
     elif [ "$cmd" = "deactivate" ]
     then
+        export PS1="${PS1/\($PYDOCKENV\) /}"
         export PYDOCKENV=""
     fi
 fi
