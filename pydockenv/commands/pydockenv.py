@@ -36,6 +36,7 @@ def create(name, project_dir, version):
         click.echo(f'Image {image_name} not found, pulling...')
         image = client.images.pull('python', tag=version)
 
+    _create_network(name)
     _create_env(image, name, project_dir)
 
     click.echo(f'Environment {name} with python version {version} created!')
@@ -50,6 +51,7 @@ def load(name, project_dir, input_file):
     with open(input_file, 'rb') as fin:
         image = client.images.load(fin)[0]
 
+    _create_network(name)
     _create_env(image, name, project_dir)
 
     click.echo(f'Environment {name} loaded from {input_file}!')
@@ -65,10 +67,30 @@ def _create_env(image, name, project_dir):
         'stdin_open': True,
         'name': containers_prefix + name,
         'mounts': mounts,
+        'network': containers_prefix + name + '_network',
     }
     client.containers.create(image, **kwargs)
 
     _set_conf(containers_prefix + name, {'workdir': workdir})
+
+
+def _create_network(env_name):
+    network_name = containers_prefix + env_name + '_network'
+    client.networks.create(network_name, check_duplicate=True)
+
+
+def _delete_network(env_name):
+    network_name = containers_prefix + env_name + '_network'
+    try:
+        network = client.networks.get(network_name)
+    except docker.errors.ImageNotFound:
+        click.echo(f'Network {network_name} not found, exiting...')
+        raise
+
+    for c in network.containers:
+        network.disconnect(c)
+
+    network.remove()
 
 
 @cli.command()
@@ -122,6 +144,7 @@ def remove(name):
         'force': True,
     }
     container.remove(**kwargs)
+    _delete_network(name)
     click.echo(f'Environment {name} removed!')
 
 
