@@ -139,6 +139,7 @@ def remove(name):
         container = client.containers.get(containers_prefix + name)
     except docker.errors.NotFound:
         click.echo(f'Environment {name} not found, exiting...')
+        raise
 
     kwargs = {
         'force': True,
