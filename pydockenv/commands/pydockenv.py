@@ -132,8 +132,17 @@ def list_environments():
         'all': True,
     }
     containers = client.containers.list(kwargs)
-    envs = [c.name[len(containers_prefix):] for c in containers
-            if c.name.startswith(containers_prefix)]
+
+    current_env = _get_current_env()
+    envs = []
+    for c in containers:
+        if not c.name.startswith(containers_prefix):
+            continue
+
+        env_name = c.name[len(containers_prefix):]
+        prefix = '* ' if env_name == current_env else '  '
+        envs.append(f'{prefix}{env_name}')
+
     click.echo('\n'.join(envs))
     click.echo(f'Environments listed!')
 
