@@ -101,7 +101,32 @@ For a more complete overview of the commands see the [Examples](#examples) and t
 
 ## Examples
 
-(TODO)
+Here are some examples that are available in the `examples` directory to show more practically how to use `pydockenv`.
+
+### Hello World!
+
+File: `examples/hello_world.py`
+
+This first example just shows how different environments work. The script simply prints the "Hello World!" string followed by the Python version being used. You can run this on different environments and see how the output changes. See the following gif.
+
+![](assets/hello-world.gif)
+
+### Requests
+
+File: `examples/requests_get.py`
+
+This second example shows how you can install external packages and run Python scripts by passing arguments as you would do normally. See the following gif.
+
+![](assets/requests-get.gif)
+
+### Flask web app
+
+File: `examples/flask_hello_world.py`
+
+This third example shows how you can run a Flask web application. This example is important as it shows some caveats that make the experience of using `pydockenv` not completely identical to using a local environment. Given the environment runs inside a container, the host must be `0.0.0.0` and not `localhost`, and the port being used must be told to `pydockenv` using the `-p/--port` flag of the `run` command. See the following gif.
+
+![](assets/flask-hello-world.gif)
+
 
 ## Commands reference
 
