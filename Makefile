@@ -1,4 +1,3 @@
-PYPI_REPOSITORY ?= pypi
 TWINE_CONFIG_FILE ?= .pypirc
 
 clean:
@@ -22,9 +21,14 @@ publish-check:
 
 	git describe --exact-match HEAD
 
-publish: build publish-check
+publish-pypi:
 	twine check dist/*
 	twine upload --config-file $(TWINE_CONFIG_FILE) --repository $(PYPI_REPOSITORY) dist/*
+
+publish-test: PYPI_REPOSITORY=testpypi
+publish-test: build publish-pypi
+publish: PYPI_REPOSITORY=pypi
+publish: build publish-check publish-pypi
 	git push origin --tags
 
 bump-major: PART = major

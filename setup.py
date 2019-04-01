@@ -37,7 +37,7 @@ def get_about():
         'version': r"^__version__\s=\s(?P<quote>['])(?P<version>[\d\.]*)(?P=quote)$",
         'author': r"^__author__\s=\s(?P<quote>['])(?P<author>[\w\s]*)(?P=quote)$",
         'author_email': r"^__author_email__\s=\s(?P<quote>['])(?P<author_email>.*)(?P=quote)$",
-        'description': r"^__author_email__\s=\s(?P<quote>['])(?P<description>.*)(?P=quote)$",
+        'description': r"^__description__\s=\s(?P<quote>['])(?P<description>.*)(?P=quote)$",
         'project_url': r"^__project_url__\s=\s(?P<quote>['])(?P<project_url>.*)(?P=quote)$",
     }
 
