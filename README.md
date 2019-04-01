@@ -63,7 +63,7 @@ With `pydockenv` you can install Python packages simply by using the install com
 ```
 pydockenv install <package>
 ```
-such as>
+such as:
 ```
 pydockenv install requests
 ```
