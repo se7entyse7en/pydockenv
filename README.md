@@ -1,6 +1,6 @@
 # pydockenv
 
-*Notice: This project is currently in alpha Stage*
+*Notice: This project is currently in alpha stage*
 
 `pydockenv` is a library that aims to give the same experience of having a virtual environment, but backed by Docker! The idea is to make the usage of Docker completely hidden so that even non-expert Docker users can leverage the advantages provided by using it as the underlying engine.
 
@@ -109,7 +109,7 @@ File: `examples/hello_world.py`
 
 This first example just shows how different environments work. The script simply prints the "Hello World!" string followed by the Python version being used. You can run this on different environments and see how the output changes. See the following gif.
 
-![](assets/hello-world.gif)
+![](https://raw.githubusercontent.com/se7entyse7en/pydockenv/master/assets/hello-world.gif)
 
 ### Requests
 
@@ -117,7 +117,7 @@ File: `examples/requests_get.py`
 
 This second example shows how you can install external packages and run Python scripts by passing arguments as you would do normally. See the following gif.
 
-![](assets/requests-get.gif)
+![](https://raw.githubusercontent.com/se7entyse7en/pydockenv/master/assets/requests-get.gif)
 
 ### Flask web app
 
@@ -125,7 +125,7 @@ File: `examples/flask_hello_world.py`
 
 This third example shows how you can run a Flask web application. This example is important as it shows some caveats that make the experience of using `pydockenv` not completely identical to using a local environment. Given the environment runs inside a container, the host must be `0.0.0.0` and not `localhost`, and the port being used must be told to `pydockenv` using the `-p/--port` flag of the `run` command. See the following gif.
 
-![](assets/flask-hello-world.gif)
+![](https://raw.githubusercontent.com/se7entyse7en/pydockenv/master/assets/flask-hello-world.gif)
 
 
 ## Commands reference

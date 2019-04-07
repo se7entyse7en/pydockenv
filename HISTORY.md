@@ -1,5 +1,11 @@
 # HISTORY
 
+## Unreleased
+
+### Fixed
+
+- Fixed images url in `README.md` by using absolute urls
+
 ## v0.2.0 - 2019-04-01
 
 ### Added
