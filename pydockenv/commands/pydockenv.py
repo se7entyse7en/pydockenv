@@ -60,7 +60,8 @@ def load(name, project_dir, input_file):
 def _create_env(image, name, project_dir):
     workdir = os.path.abspath(project_dir)
     mounts = [
-        Mount('/usr/src', workdir, type='bind')
+        Mount('/usr/src', workdir, type='bind'),
+        Mount('/var/run/docker.sock', '/var/run/docker.sock', type='bind')
     ]
     kwargs = {
         'command': '/bin/sh',
