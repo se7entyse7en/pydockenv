@@ -4,6 +4,7 @@
 
 ### Added
 
+- Exits with status code `1` when called with unsopported shells
 - Added `Development` section in `README.md`
 
 ### Fixed
