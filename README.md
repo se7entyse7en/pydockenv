@@ -141,3 +141,12 @@ This third example shows how you can run a Flask web application. This example i
 ## Advanced
 
 (TODO)
+
+## Development
+
+To develop on `pydockenv` clone the repository and perform the following steps:
+1. `pydockenv create pydockenv-env <path to pydockenv> --version=3.7`
+2. `pydockenv install -l .`
+3. `docker exec -w /usr/src -i -t pydockenv_pydockenv-env /bin/bash`
+
+From within the container you can then run the `HEAD` version of `pydockenv`.
