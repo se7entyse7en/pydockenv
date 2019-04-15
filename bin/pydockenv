@@ -20,7 +20,9 @@ fi
 pydockenv_entry_point=$(python -c 'from pydockenv.commands import pydockenv; print(pydockenv.__file__)')
 python $pydockenv_entry_point $@
 
-if [ $? -eq 0 ]
+exitCode=$?
+
+if [ $exitCode -eq 0 ]
 then
     if [ "$cmd" = "activate" ]
     then
@@ -32,3 +34,5 @@ then
         export PYDOCKENV=""
     fi
 fi
+
+exit $exitCode
