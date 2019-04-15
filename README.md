@@ -141,3 +141,32 @@ This third example shows how you can run a Flask web application. This example i
 ## Advanced
 
 (TODO)
+
+## Development
+
+To setup you environment to develop `pydockenv` run the followings:
+1. Clone the repository where you prefer:
+```
+git clone https://github.com/se7entyse7en/pydockenv.git <dir>
+```
+2. Enter in the project root directory:
+```
+cd <dir>
+```
+3. Install `pydockenv` in editable mode in another path:
+```
+export PYTHONPATH=<prefix>/lib/python3.7/site-packages
+mkdir -p <prefix>/lib/python3.7/site-packages
+pip install --prefix <prefix> -e .
+```
+I personally use `~/.local-dev` as `<prefix>`.
+4. Rename `pydockvenv` into `dev-pydockenv` or whatever you want:
+```
+mv <prefix>/bin/{,dev-}pydockenv
+```
+5. Add `<prefix>/bin` to you `$PATH`:
+```
+export PATH=<prefix>/bin:$PATH
+```
+
+Now you have `dev-pydockenv` that runs the development version of `pydockenv`!

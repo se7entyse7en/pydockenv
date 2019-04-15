@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Added `Development` section in `README.md`
+
 ### Fixed
 
 - Fixed images url in `README.md` by using absolute urls
