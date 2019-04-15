@@ -258,12 +258,15 @@ def run(cmd, args, env_var, port):
 # Using `pip` for now
 @cli.command()
 @click.argument('package', required=False)
+@click.option('-l', '--local', is_flag=True, help='Install in editable mode')
 @click.option('-f', '--file', 'requirements_file',
               help='File to containing the requirements to install')
-def install(package, requirements_file):
+def install(package, local, requirements_file):
     click.echo('Running...')
     args = ['pip', 'install']
-    if requirements_file:
+    if local:
+        args.extend(['-e', package])
+    elif requirements_file:
         args.extend(['-r', requirements_file])
     else:
         args.append(package)
