@@ -8,6 +8,7 @@
 - Added `Development` section in `README.md`
 - Added printing of environment variables when running `pydockenv` if `PYDOCKENV_DEBUG` is set
 - Added some integration tests
+- Added CI on travis
 
 ### Fixed
 
