@@ -21,7 +21,6 @@ pydockenv_entry_point=$(python -c 'from pydockenv.commands import pydockenv; pri
 python $pydockenv_entry_point $@
 
 exitCode=$?
-
 if [ $exitCode -eq 0 ]
 then
     if [ "$cmd" = "activate" ]
@@ -33,6 +32,11 @@ then
         export PS1="${PS1/\($PYDOCKENV\) /}"
         export PYDOCKENV=""
     fi
+fi
+
+if [ -n "$PYDOCKENV_DEBUG" ]
+then
+    env 1>&2
 fi
 
 exit $exitCode
