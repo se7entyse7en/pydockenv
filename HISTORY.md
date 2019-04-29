@@ -1,10 +1,10 @@
 # HISTORY
 
-## Unreleased
+## v0.2.1 - 2019-04-29
 
 ### Added
 
-- Exits with status code `1` when called with unsopported shells
+- Exits with status code `1` when called with unsupported shells
 - Added `Development` section in `README.md`
 - Added printing of environment variables when running `pydockenv` if `PYDOCKENV_DEBUG` is set
 - Added some integration tests
