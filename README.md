@@ -1,5 +1,10 @@
 # pydockenv
 
+![Python versions](https://img.shields.io/pypi/pyversions/pydockenv.svg)
+![Pypi](https://img.shields.io/pypi/v/pydockenv.svg)
+![Travis build](https://img.shields.io/travis/se7entyse7en/pydockenv.svg)
+![License](https://img.shields.io/github/license/se7entyse7en/pydockenv.svg)
+
 *Notice: This project is currently in alpha stage*
 
 `pydockenv` is a library that aims to give the same experience of having a virtual environment, but backed by Docker! The idea is to make the usage of Docker completely hidden so that even non-expert Docker users can leverage the advantages provided by using it as the underlying engine.

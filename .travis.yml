@@ -1,0 +1,17 @@
+dist: xenial
+language: python
+python:
+  - "3.7"
+
+services:
+  - docker
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install bash
+  - sudo chsh -s /bin/bash
+  - pip install $(grep tox requirements-dev.txt)
+  - sed -i 's/#!\/usr\/bin\/env sh/#!\/bin\/bash/' bin/pydockenv
+
+script:
+  - tox
