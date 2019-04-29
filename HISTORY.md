@@ -5,10 +5,13 @@
 ### Added
 
 - Added `Development` section in `README.md`
+- Added printing of environment variables when running `pydockenv` if `PYDOCKENV_DEBUG` is set
+- Added some integration tests
 
 ### Fixed
 
 - Fixed images url in `README.md` by using absolute urls
+- Fixed exit code of `pydockenv`
 
 ## v0.2.0 - 2019-04-01
 
