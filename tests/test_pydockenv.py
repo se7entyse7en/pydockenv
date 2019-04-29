@@ -107,13 +107,13 @@ class TestPydockenv(unittest.TestCase):
             f'create {env_name} {str(proj_dir)} --version={py_version}')
         env_diff = commander.activate_env(f'{env_name}')
 
-        self.assertEqual({'PYDOCKENV', 'PYDOCKENV_DEBUG', 'PS1', 'SHLVL'},
-                         env_diff.keys())
+        self.assertTrue({'PYDOCKENV', 'PYDOCKENV_DEBUG', 'PS1', 'SHLVL'} <=
+                        set(env_diff.keys()))
         self.assertEqual(env_diff['PYDOCKENV'][1], env_name)
         self.assertEqual(env_diff['PYDOCKENV_DEBUG'][1], '1')
         self.assertEqual(env_diff['PS1'][1], f'({env_name})')
         self.assertEqual(int(env_diff['SHLVL'][1]),
-                         int(env_diff['SHLVL'][0]) + 1)
+                         int(env_diff['SHLVL'][0] or 0) + 1)
 
     def test_activate_and_deactivate(self):
         env_name = self._env_name()
