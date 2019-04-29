@@ -20,7 +20,7 @@ classifiers = [
     'License :: OSI Approved :: Apache Software License',
     'Operating System :: Unix',
     'Programming Language :: Unix Shell',
-    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.7',
     'Topic :: Software Development',
     'Topic :: Utilities'
 ]
