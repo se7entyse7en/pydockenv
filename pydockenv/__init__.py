@@ -1,5 +1,5 @@
 __title__ = 'pydockenv'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 __author__ = 'Lou Marvin Caraig'
 __author_email__ = 'loumarvincaraig@gmail.com'
 __description__ = 'Python Virtualenv Powered by Docker'

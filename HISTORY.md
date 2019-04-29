@@ -1,6 +1,6 @@
 # HISTORY
 
-## Unreleased
+## v0.2.1 - 2019-04-29
 
 ### Added
 
