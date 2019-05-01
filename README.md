@@ -50,7 +50,7 @@ This will create a Docker container with the latest Python version installed! If
 pydockenv create awesome-project . --version=3.6
 ```
 
-As you may have noticed, to create the environment you have to set a project directory. This means that everything that is not inside the project directory is completely invisible to the environment. For example, you cannot a Python script that resides outside your project directory. See the details in the [Advanced](#advanced) section.
+As you may have noticed, to create the environment you have to set a project directory. This means that everything that is not inside the project directory is completely invisible to the environment. For example, you cannot access a Python script that resides outside your project directory. See the details in the [Advanced](#advanced) section.
 
 ### Activation and packages installation
 
