@@ -35,4 +35,7 @@ then
     env 1>&2
 fi
 
-exit $exitCode
+if ! [ $sourced -eq 1 ]; then
+    exit $exitCode
+fi
+
