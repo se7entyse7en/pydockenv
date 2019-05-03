@@ -1,6 +1,6 @@
 # HISTORY
 
-## Unreleased
+## v0.2.2 - 2019-05-03
 
 ### Fixed
 
