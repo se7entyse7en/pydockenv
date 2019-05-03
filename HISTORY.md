@@ -1,5 +1,13 @@
 # HISTORY
 
+## Unreleased
+
+### Added
+
+- Added support to python 3.6.
+- [internal] Added testing with python 3.6
+
+
 ## v0.2.2 - 2019-05-03
 
 ### Fixed
