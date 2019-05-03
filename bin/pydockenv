@@ -2,14 +2,21 @@
 
 
 cmd="$1"
-if [ "$cmd" = activate ] || [ "$cmd" = deactivate ]; then
-    ([[ -n $ZSH_EVAL_CONTEXT && $ZSH_EVAL_CONTEXT =~ :file$ ]] ||
+
+([[ -n $ZSH_EVAL_CONTEXT && $ZSH_EVAL_CONTEXT =~ :file$ ]] ||
      [[ -n $KSH_VERSION && $(cd "$(dirname -- "$0")" &&
                                  printf '%s' "${PWD%/}/")$(basename -- "$0") != "${.sh.file}" ]] ||
      [[ -n $BASH_VERSION ]] && (return 0 2>/dev/null)) && sourced=1 || sourced=0
+
+if [ "$cmd" = activate ] || [ "$cmd" = deactivate ]; then
     if [ $sourced -eq 0 ]; then
         "$cmd command must be called using 'source' with a supported shell"
         exit 1;
+    fi
+else
+    if [ $sourced -eq 1 ]; then
+        "source this script only with activate/deactivate commands"
+        return;
     fi
 fi
 
