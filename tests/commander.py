@@ -25,8 +25,12 @@ class Commander:
 
     def run(self, cmd, env=None):
         args = cmd.split(' ')
-        return subprocess.run([self._bin_path, *args], capture_output=True,
-                              env=env)
+
+        return subprocess.run(
+            [self._bin_path, *args],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            env=env
+        )
 
     @contextmanager
     def active_env(self, env_name):
