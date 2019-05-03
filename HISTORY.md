@@ -1,40 +1,46 @@
 # HISTORY
 
-## v0.2.1 - 2019-04-29
+## Unreleased
+
+### Fixed
+
+- Fixed bug in `pydockenv` binary that makes it exit from parent when sourced introduced in `v0.2.1`.
+
+## v0.2.1 - 2019-04-29 [YANKED]
 
 ### Added
 
 - Exits with status code `1` when called with unsupported shells
-- Added `Development` section in `README.md`
 - Added printing of environment variables when running `pydockenv` if `PYDOCKENV_DEBUG` is set
-- Added some integration tests
-- Added CI on travis
+- [documentation] Added `Development` section in `README.md`
+- [internal] Added some integration tests
+- [internal] Added CI on travis
 
 ### Fixed
 
-- Fixed images url in `README.md` by using absolute urls
 - Fixed exit code of `pydockenv`
+- [documentation] Fixed images url in `README.md` by using absolute urls
 
 ## v0.2.0 - 2019-04-01
 
 ### Added
 
-- Added publishing of git tag when publishing
-- Marked with '*' the active environment when listing
+- Marked with `*` the active environment when listing
 - Change `PS1` when activating and deactivating environment
 - Added an ad-hoc network for each environment
-- Added `publish-test` Makefile target
+- [internal] Added `publish-test` Makefile target
+- [internal] Added publishing of git tag when publishing
 
 ### Changed
 
-- Updated `README.md` by adding some documentation and examples
-- Changed bumpversion to include the release date in `HISTORY.md`
+- [documentation] Updated `README.md` by adding some documentation and examples
+- [internal] Changed bumpversion to include the release date in `HISTORY.md`
 
 ### Fixed
 
-- Fixed `.bumpversion.cfg` by making each version a subsection
-- Fixed description field in `setup.py`
-- Added missing `twine` dev dependency
+- [internal] Fixed `.bumpversion.cfg` by making each version a subsection
+- [internal] Fixed description field in `setup.py`
+- [internal] Added missing `twine` dev dependency
 
 
 ## v0.1.0 - 2019-04-01
