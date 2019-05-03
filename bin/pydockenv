@@ -1,20 +1,23 @@
 #!/usr/bin/env sh
 
-if [ -n "$ZSH_VERSION" ] || [ -n "$BASH_VERSION" ] || [ -n "$KSH_VERSION" ]; then
-    ([[ -n $ZSH_EVAL_CONTEXT && $ZSH_EVAL_CONTEXT =~ :file$ ]] ||
+
+cmd="$1"
+
+([[ -n $ZSH_EVAL_CONTEXT && $ZSH_EVAL_CONTEXT =~ :file$ ]] ||
      [[ -n $KSH_VERSION && $(cd "$(dirname -- "$0")" &&
                                  printf '%s' "${PWD%/}/")$(basename -- "$0") != "${.sh.file}" ]] ||
      [[ -n $BASH_VERSION ]] && (return 0 2>/dev/null)) && sourced=1 || sourced=0
-else
-    echo "Unsupported shell"
-    exit 1
-fi
 
-cmd="$1"
-if [ $sourced -eq 0 ] && ([ "$cmd" = "activate" ] || [ "$cmd" = "deactivate" ])
-then
-    echo "$cmd command must be called using 'source'"
-    exit 1
+if [ "$cmd" = activate ] || [ "$cmd" = deactivate ]; then
+    if [ $sourced -eq 0 ]; then
+        "$cmd command must be called using 'source' with a supported shell"
+        exit 1;
+    fi
+else
+    if [ $sourced -eq 1 ]; then
+        "source this script only with activate/deactivate commands"
+        return;
+    fi
 fi
 
 pydockenv_entry_point=$(python -c 'from pydockenv.commands import pydockenv; print(pydockenv.__file__)')
@@ -39,4 +42,7 @@ then
     env 1>&2
 fi
 
-exit $exitCode
+if ! [ $sourced -eq 1 ]; then
+    exit $exitCode
+fi
+

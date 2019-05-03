@@ -11,7 +11,6 @@ before_install:
   - sudo apt-get install bash
   - sudo chsh -s /bin/bash
   - pip install $(grep tox requirements-dev.txt)
-  - sed -i 's/#!\/usr\/bin\/env sh/#!\/bin\/bash/' bin/pydockenv
 
 script:
   - tox
