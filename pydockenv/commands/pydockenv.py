@@ -151,6 +151,7 @@ def remove(name):
     }
     container.remove(**kwargs)
     _delete_network(name)
+    _remove_from_conf(containers_prefix + name)
     click.echo(f'Environment {name} removed!')
 
 
@@ -187,6 +188,9 @@ def _get_conf(env_name):
 def _set_conf(env_name, conf):
     status = _get_conf(env_name)
     status[env_name] = conf
+def _remove_from_conf(key):
+    status = _get_conf()
+    status.pop(key, None)
 
     os.makedirs(str(conf_file_dir), exist_ok=True)
     with open(str(envs_conf_path), 'w') as fout:
