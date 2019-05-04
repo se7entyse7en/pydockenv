@@ -13,8 +13,9 @@ class Commander:
 
     _instance = None
 
-    def __init__(self):
+    def __init__(self, env=None):
         self._bin_path = BIN_PATH
+        self._env = env or {}
 
     @classmethod
     def get_instance(cls):
@@ -23,8 +24,13 @@ class Commander:
 
         return cls._instance
 
+    def add_env_var(self, k, v):
+        self._env[k] = v
+
     def run(self, cmd, env=None):
         args = cmd.split(' ')
+
+        env = self._prepare_env(env)
 
         return subprocess.run(
             [self._bin_path, *args],
@@ -50,6 +56,8 @@ class Commander:
         return self.source('deactivate', env=env)
 
     def source(self, cmd, env=None):
+        env = self._prepare_env(env)
+
         proc = subprocess.Popen('env', stdout=subprocess.PIPE, shell=True,
                                 env=env)
         initial_env = self._get_env(proc.stdout)
@@ -74,5 +82,15 @@ class Commander:
         for line in stdout:
             (key, _, value) = line.decode('utf8').strip().partition("=")
             env[key] = value
+
+        return env
+
+    def _prepare_env(self, env):
+        env = {**self._env, **(env or {})}
+        if env:
+            env = {k: v for k, v in {**os.environ, **env}.items()
+                   if v is not None}
+        else:
+            env = None
 
         return env
