@@ -76,7 +76,7 @@ def _create_env(image, name, project_dir):
     }
     client.containers.create(image, **kwargs)
 
-    _set_conf(containers_prefix + name, {'workdir': workdir})
+    _update_conf({containers_prefix + name: {'workdir': workdir}})
 
 
 def _create_network(env_name):
@@ -177,17 +177,27 @@ def list_environments():
     click.echo(f'Environments listed!')
 
 
-def _get_conf(env_name):
+def _get_env_conf(env_name):
+    return _get_conf().get(env_name, {})
+
+
+def _get_conf():
     if not envs_conf_path.exists():
         return {}
 
     with open(str(envs_conf_path)) as fin:
-        return json.load(fin).get(env_name, {})
+        return json.load(fin)
 
 
-def _set_conf(env_name, conf):
-    status = _get_conf(env_name)
-    status[env_name] = conf
+def _update_conf(conf_update):
+    status = _get_conf()
+    status.update(conf_update)
+
+    os.makedirs(str(conf_file_dir), exist_ok=True)
+    with open(str(envs_conf_path), 'w') as fout:
+        return json.dump(status, fout)
+
+
 def _remove_from_conf(key):
     status = _get_conf()
     status.pop(key, None)
@@ -310,7 +320,8 @@ def _run(*args, **kwargs):
         raise
     else:
         # This cannot be done with docker python sdk
-        host_base_wd = _get_conf(containers_prefix + current_env)['workdir']
+        host_base_wd = _get_env_conf(
+            containers_prefix + current_env)['workdir']
         current_wd = os.getcwd()
         if not current_wd.startswith(host_base_wd):
             raise RuntimeError(
