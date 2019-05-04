@@ -8,10 +8,7 @@ services:
   - docker
 
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install bash
-  - sudo chsh -s /bin/bash
-  - pip install tox-travis
+  - pip install .
 
 script:
-  - tox
+  - python -m unittest discover

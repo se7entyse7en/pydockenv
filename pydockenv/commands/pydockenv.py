@@ -11,7 +11,12 @@ from docker.types import Mount
 
 
 client = docker.from_env()
-conf_file_dir = Path(str(Path.home()), '.pydockenv')
+conf_file_dir = os.environ.get('PYDOCKENV_CONF_FILE_DIR')
+if not conf_file_dir:
+    conf_file_dir = Path(str(Path.home()), '.pydockenv')
+else:
+    conf_file_dir = Path(conf_file_dir)
+
 status_file_path = Path(str(conf_file_dir), 'status.json')
 envs_conf_path = Path(str(conf_file_dir), 'envs.json')
 containers_prefix = 'pydockenv_'
@@ -71,7 +76,7 @@ def _create_env(image, name, project_dir):
     }
     client.containers.create(image, **kwargs)
 
-    _set_conf(containers_prefix + name, {'workdir': workdir})
+    _update_conf({containers_prefix + name: {'workdir': workdir}})
 
 
 def _create_network(env_name):
@@ -146,6 +151,7 @@ def remove(name):
     }
     container.remove(**kwargs)
     _delete_network(name)
+    _remove_from_conf(containers_prefix + name)
     click.echo(f'Environment {name} removed!')
 
 
@@ -171,17 +177,30 @@ def list_environments():
     click.echo(f'Environments listed!')
 
 
-def _get_conf(env_name):
+def _get_env_conf(env_name):
+    return _get_conf().get(env_name, {})
+
+
+def _get_conf():
     if not envs_conf_path.exists():
         return {}
 
     with open(str(envs_conf_path)) as fin:
-        return json.load(fin).get(env_name, {})
+        return json.load(fin)
 
 
-def _set_conf(env_name, conf):
-    status = _get_conf(env_name)
-    status[env_name] = conf
+def _update_conf(conf_update):
+    status = _get_conf()
+    status.update(conf_update)
+
+    os.makedirs(str(conf_file_dir), exist_ok=True)
+    with open(str(envs_conf_path), 'w') as fout:
+        return json.dump(status, fout)
+
+
+def _remove_from_conf(key):
+    status = _get_conf()
+    status.pop(key, None)
 
     os.makedirs(str(conf_file_dir), exist_ok=True)
     with open(str(envs_conf_path), 'w') as fout:
@@ -301,7 +320,8 @@ def _run(*args, **kwargs):
         raise
     else:
         # This cannot be done with docker python sdk
-        host_base_wd = _get_conf(containers_prefix + current_env)['workdir']
+        host_base_wd = _get_env_conf(
+            containers_prefix + current_env)['workdir']
         current_wd = os.getcwd()
         if not current_wd.startswith(host_base_wd):
             raise RuntimeError(
