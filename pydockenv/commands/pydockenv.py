@@ -11,7 +11,12 @@ from docker.types import Mount
 
 
 client = docker.from_env()
-conf_file_dir = Path(str(Path.home()), '.pydockenv')
+conf_file_dir = os.environ.get('PYDOCKENV_CONF_FILE_DIR')
+if not conf_file_dir:
+    conf_file_dir = Path(str(Path.home()), '.pydockenv')
+else:
+    conf_file_dir = Path(conf_file_dir)
+
 status_file_path = Path(str(conf_file_dir), 'status.json')
 envs_conf_path = Path(str(conf_file_dir), 'envs.json')
 containers_prefix = 'pydockenv_'
