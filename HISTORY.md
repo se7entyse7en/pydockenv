@@ -5,7 +5,18 @@
 ### Added
 
 - Added support to python 3.6.
+- Added possibility to specify environments' configuration file location using `PYDOCKENV_CONF_FILE_DIR` env var
 - [internal] Added testing with python 3.6
+- [internal] Added some others integraion tests
+
+### Changed
+
+- [internal] Cleaned `.travis.yml`
+
+### Fixed
+
+- Fixed removal of key from environments configuration file when an environment is removed
+- Fixed update of environments configuration file that prevents some commands to work
 
 
 ## v0.2.2 - 2019-05-03
