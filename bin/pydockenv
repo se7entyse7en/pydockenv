@@ -1,22 +1,25 @@
 #!/usr/bin/env sh
 
-
 cmd="$1"
 
-([[ -n $ZSH_EVAL_CONTEXT && $ZSH_EVAL_CONTEXT =~ :file$ ]] ||
-     [[ -n $KSH_VERSION && $(cd "$(dirname -- "$0")" &&
-                                 printf '%s' "${PWD%/}/")$(basename -- "$0") != "${.sh.file}" ]] ||
-     [[ -n $BASH_VERSION ]] && (return 0 2>/dev/null)) && sourced=1 || sourced=0
+sourced=0
+if [ -n "$ZSH_EVAL_CONTEXT" ]; then
+    case $ZSH_EVAL_CONTEXT in *:file) sourced=1;; esac
+elif [ -n "$KSH_VERSION" ]; then
+    [ "$(cd $(dirname -- $0) && pwd -P)/$(basename -- $0)" != "$(cd $(dirname -- ${.sh.file}) && pwd -P)/$(basename -- ${.sh.file})" ] && sourced=1
+elif [ -n "$BASH_VERSION" ]; then
+    (return 0 2>/dev/null) && sourced=1
+fi
 
 if [ "$cmd" = activate ] || [ "$cmd" = deactivate ]; then
-    if [ $sourced -eq 0 ]; then
-        "$cmd command must be called using 'source' with a supported shell"
-        exit 1;
+    if [ "$sourced" -eq 0 ]; then
+        echo "$cmd command must be called using 'source' with a supported shell"
+        exit 1
     fi
 else
-    if [ $sourced -eq 1 ]; then
-        "source this script only with activate/deactivate commands"
-        return;
+    if [ "$sourced" -eq 1 ]; then
+        echo "source this script only with activate/deactivate commands"
+        return 1
     fi
 fi
 
@@ -45,4 +48,3 @@ fi
 if ! [ $sourced -eq 1 ]; then
     exit $exitCode
 fi
-
