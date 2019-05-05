@@ -59,7 +59,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url=about['project_url'],
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=['tests']),
     scripts=scripts,
     package_data={'': ['LICENSE']},
     include_package_data=True,
