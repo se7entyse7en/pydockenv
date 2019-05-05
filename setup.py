@@ -28,8 +28,6 @@ classifiers = [
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
-with open('HISTORY.md') as f:
-    history = f.read()
 
 
 def get_about():
