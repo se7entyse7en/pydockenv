@@ -23,8 +23,10 @@ else
     fi
 fi
 
-pydockenv_entry_point=$(python -c 'from pydockenv.commands import pydockenv; print(pydockenv.__file__)')
-python $pydockenv_entry_point $@
+python=${PYDOCKENV_INTERPRETER:-python}
+
+pydockenv_entry_point=$($python -c 'from pydockenv.commands import pydockenv; print(pydockenv.__file__)')
+$python $pydockenv_entry_point $@
 
 exitCode=$?
 if [ $exitCode -eq 0 ]
