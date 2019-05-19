@@ -172,6 +172,7 @@ mkdir -p <prefix>/lib/python3.7/site-packages
 pip install --prefix <prefix> -e .
 ```
 I personally use `~/.local-dev` as `<prefix>`.
+
 4. Rename `pydockvenv` into `dev-pydockenv` or whatever you want:
 ```
 mv <prefix>/bin/{,dev-}pydockenv
