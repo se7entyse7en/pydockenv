@@ -1,5 +1,6 @@
 import os
 import subprocess
+from contextlib import contextmanager
 from itertools import chain
 
 import click
@@ -34,30 +35,40 @@ class Executor:
 
         relative_wd = current_wd[len(host_base_wd):]
         guest_wd = f'/usr/src{relative_wd}'
-        if kwargs.get('env_vars'):
-            env_vars = list(chain.from_iterable([
-                ['-e', f'{k}={v}']for k, v in kwargs['env_vars'].items()
-            ]))
-        else:
-            env_vars = []
 
-        if kwargs.get('ports'):
+        env_vars = cls._build_env_vars(kwargs.get('env_vars'))
+        with cls._with_mapped_ports(container, kwargs.get('ports')):
+            args = (
+                ['docker', 'exec', '-w', guest_wd, '-i', '-t'] +
+                env_vars +
+                [(definitions.CONTAINERS_PREFIX + current_env)] +
+                list(args)
+            )
+
+            subprocess.check_call(args)
+
+    @classmethod
+    def _build_env_vars(cls, env_vars):
+        if env_vars:
+            return list(chain.from_iterable([
+                ['-e', f'{k}={v}']for k, v in env_vars.items()
+            ]))
+
+        return []
+
+    @classmethod
+    @contextmanager
+    def _with_mapped_ports(cls, container, ports):
+        if ports:
             port_mappers_containers_names = cls._run_port_mapper(
-                container, kwargs['ports'])
+                container, ports)
         else:
             port_mappers_containers_names = []
 
-        args = (
-            ['docker', 'exec', '-w', guest_wd, '-i', '-t'] +
-            env_vars +
-            [(definitions.CONTAINERS_PREFIX + current_env)] +
-            list(args)
-        )
-
-        subprocess.check_call(args)
+        yield
 
         for container_name in port_mappers_containers_names:
-            container = client.containers.get(container_name)
+            container = Client.get_instance().containers.get(container_name)
             container.stop()
 
     @classmethod
