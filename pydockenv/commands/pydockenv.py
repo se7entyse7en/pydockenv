@@ -294,10 +294,16 @@ def install(package, requirements_file):
 
 @cli.command()
 @click.argument('package')
-def uninstall(package):
+@click.option('-y', '--yes', is_flag=True)
+def uninstall(package, yes):
     click.echo('Running...')
+    args = ['pip', 'uninstall']
+    if yes:
+        args.append('-y')
+
+    args.append(package)
     try:
-        _run('pip', 'uninstall', package)
+        _run(*args)
     finally:
         click.echo('Exited!')
 
