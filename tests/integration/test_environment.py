@@ -1,78 +1,12 @@
-import json
-import os
-import shutil
-import unittest
 from pathlib import Path
 
 import docker
 
 from pydockenv import definitions
-from pydockenv.client import Client
-from pydockenv.commands.environment import delete_network
-from tests.commander import Commander
+from tests.base import BaseIntegrationTest
 
 
-class TestPydockenv(unittest.TestCase):
-
-    ENV_SUFFIX = '__test-{index}'
-
-    @classmethod
-    def setUpClass(cls):
-        cls._client = docker.from_env()
-        cls._low_level_client = docker.APIClient()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls._client.close()
-        cls._low_level_client.close()
-
-    def setUp(self):
-        self._cwd = os.getcwd()
-        self._test_dir = Path(definitions.ROOT_DIR, '.test-dir')
-        self._conf_dir = Path(str(self._test_dir), 'conf')
-        self._projs_dir = Path(str(self._test_dir), 'projs')
-
-        self._commander = Commander(env={
-            'PYDOCKENV_CONF_FILE_DIR': str(self._conf_dir)
-        })
-
-        self._env_index = 1
-        os.makedirs(str(self._conf_dir))
-        os.makedirs(str(self._projs_dir))
-
-    def tearDown(self):
-        os.chdir(self._cwd)
-        try:
-            for i in range(1, self._env_index):
-                env_name = self._create_env_name(i)
-                try:
-                    Client.get_instance().containers.get(
-                        definitions.CONTAINERS_PREFIX + env_name).remove(
-                            force=True)
-                    delete_network(env_name)
-                except docker.errors.NotFound:
-                    pass
-        finally:
-            shutil.rmtree(self._test_dir.name)
-
-    def _env_name(self):
-        env_name = self._create_env_name(self._env_index)
-        self._env_index += 1
-        return env_name
-
-    def _create_env_name(self, index):
-        suffix = self.ENV_SUFFIX.format(index=index)
-        return f'env{suffix}'
-
-    def _create_project_dir(self, proj_name):
-        proj_dir = Path(str(self._projs_dir), proj_name)
-        os.makedirs(str(proj_dir))
-        return proj_dir
-
-    def _get_conf(self):
-        conf_file_dir = Path(str(self._conf_dir), 'envs.json')
-        with open(str(conf_file_dir)) as fin:
-            return json.load(fin)
+class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
 
     def test_create(self):
         env_name = self._env_name()
@@ -285,56 +219,3 @@ class TestPydockenv(unittest.TestCase):
             out = self._commander.run('status', env=env)
             self.assertEqual(out.stdout.decode('utf8').strip(),
                              f'Active environment: {env_name}')
-
-    def test_run(self):
-        data = [
-            {
-                'env_name': self._env_name(),
-                'proj_name': 'test-proj-1',
-                'v': '3.7',
-            },
-            {
-                'env_name': self._env_name(),
-                'proj_name': 'test-proj-2',
-                'v': '3.6',
-            },
-            {
-                'env_name': self._env_name(),
-                'proj_name': 'test-proj-3',
-                'v': '2.7',
-            },
-        ]
-
-        for d in data:
-            proj_dir = self._create_project_dir(d['proj_name'])
-            self._commander.run(
-                f"create {d['env_name']} {str(proj_dir)} --version={d['v']}")
-            with self._commander.active_env(d['env_name']) as env:
-                os.chdir(proj_dir)
-                out = self._commander.run('run -- python --version', env=env)
-                self.assertIn(f"Python {d['v']}", out.stdout.decode('utf8'))
-
-            os.chdir(definitions.ROOT_DIR)
-
-    def test_deps_handling(self):
-        env_name = self._env_name()
-        proj_name, py_version = 'test-proj', '3.7'
-
-        proj_dir = self._create_project_dir(proj_name)
-        self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
-        with self._commander.active_env(env_name) as env:
-            os.chdir(proj_dir)
-
-            out = self._commander.run('list-packages', env=env)
-            self.assertNotIn(f'pydockenv', out.stdout.decode('utf8'))
-
-            self._commander.run('install pydockenv', env=env)
-
-            out = self._commander.run('list-packages', env=env)
-            self.assertIn(f'pydockenv', out.stdout.decode('utf8'))
-
-            self._commander.run('uninstall -y pydockenv ', env=env)
-
-            out = self._commander.run('list-packages', env=env)
-            self.assertNotIn(f'pydockenv', out.stdout.decode('utf8'))
