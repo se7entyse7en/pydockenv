@@ -87,6 +87,7 @@ class Commander:
 
     def _prepare_env(self, env):
         env = {**self._env, **(env or {})}
+        env['PYTHONPATH'] = definitions.ROOT_DIR
         if env:
             env = {k: v for k, v in {**os.environ, **env}.items()
                    if v is not None}

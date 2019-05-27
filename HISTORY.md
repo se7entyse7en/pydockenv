@@ -5,12 +5,18 @@
 ### Added
 
 - Added possibility to specify the python interpreted to use through the `PYDOCKENV_INTERPRETER` environment variable.
+- Added `-y/--yes` flag to `uninstall` command.
 - [internal] Added some others integration tests.
+
+### Changed
+
+- Refactored code in order to make it more suitable for being used programmatically as a library.
 
 ### Fixed
 
 - Avoided bashism in `pydockenv` binary.
 - Fixed installation from source tarball.
+- Fixed missing network argument when creating port mapper that was supposed to be added in `v0.2.0` due to the ad-hoc network.
 
 ## v0.2.3 - 2019-05-04
 

@@ -7,9 +7,8 @@ from pathlib import Path
 import docker
 
 from pydockenv import definitions
-from pydockenv.commands.pydockenv import _delete_network
-from pydockenv.commands.pydockenv import client
-from pydockenv.commands.pydockenv import containers_prefix
+from pydockenv.client import Client
+from pydockenv.commands.environment import delete_network
 from tests.commander import Commander
 
 
@@ -47,9 +46,10 @@ class TestPydockenv(unittest.TestCase):
             for i in range(1, self._env_index):
                 env_name = self._create_env_name(i)
                 try:
-                    client.containers.get(containers_prefix + env_name).remove(
-                        force=True)
-                    _delete_network(env_name)
+                    Client.get_instance().containers.get(
+                        definitions.CONTAINERS_PREFIX + env_name).remove(
+                            force=True)
+                    delete_network(env_name)
                 except docker.errors.NotFound:
                     pass
         finally:
@@ -79,7 +79,8 @@ class TestPydockenv(unittest.TestCase):
         proj_name, py_version = 'test-proj', '3.7'
 
         with self.assertRaises(docker.errors.NotFound):
-            self._client.containers.get(containers_prefix + env_name)
+            self._client.containers.get(
+                definitions.CONTAINERS_PREFIX + env_name)
 
         proj_dir = self._create_project_dir(proj_name)
         out = self._commander.run(
@@ -91,11 +92,12 @@ class TestPydockenv(unittest.TestCase):
         self.assertEqual(out.returncode, 0)
         self.assertIn(expected, out.stdout.decode('utf8'))
 
-        r = self._client.containers.get(containers_prefix + env_name)
+        r = self._client.containers.get(
+            definitions.CONTAINERS_PREFIX + env_name)
         self.assertEqual(r.status, 'created')
 
         r = self._low_level_client.inspect_container(
-            containers_prefix + env_name)
+            definitions.CONTAINERS_PREFIX + env_name)
         self.assertEqual(len(r['Mounts']), 1)
 
         expected = {
@@ -109,13 +111,13 @@ class TestPydockenv(unittest.TestCase):
         actual = r['Mounts'][0]
         self.assertEqual(expected, actual)
 
-        expected = {f'{containers_prefix}{env_name}_network'}
+        expected = {f'{definitions.CONTAINERS_PREFIX}{env_name}_network'}
         actual = set(r['NetworkSettings']['Networks'].keys())
         self.assertEqual(expected, actual)
 
         conf = self._get_conf()
 
-        container_name = f'{containers_prefix}{env_name}'
+        container_name = f'{definitions.CONTAINERS_PREFIX}{env_name}'
         expected = {
             container_name: {
                 'workdir': str(Path(self._projs_dir, proj_name))
@@ -144,7 +146,8 @@ class TestPydockenv(unittest.TestCase):
 
         for d in data:
             with self.assertRaises(docker.errors.NotFound):
-                self._client.containers.get(containers_prefix + d['env_name'])
+                self._client.containers.get(
+                    definitions.CONTAINERS_PREFIX + d['env_name'])
 
             proj_dir = self._create_project_dir(d['proj_name'])
             self._commander.run(
@@ -153,7 +156,7 @@ class TestPydockenv(unittest.TestCase):
 
         conf = self._get_conf()
         expected = {
-            f"{containers_prefix}{d['env_name']}": {
+            f"{definitions.CONTAINERS_PREFIX}{d['env_name']}": {
                 'workdir': str(Path(self._projs_dir, d['proj_name']))
             } for d in data
         }
@@ -165,23 +168,26 @@ class TestPydockenv(unittest.TestCase):
         proj_name, py_version = 'test-proj', '3.7'
 
         with self.assertRaises(docker.errors.NotFound):
-            self._client.containers.get(containers_prefix + env_name)
+            self._client.containers.get(
+                definitions.CONTAINERS_PREFIX + env_name)
 
         proj_dir = self._create_project_dir(proj_name)
         self._commander.run(
             f'create {env_name} {str(proj_dir)} --version={py_version}')
 
-        r = self._client.containers.get(containers_prefix + env_name)
+        r = self._client.containers.get(
+            definitions.CONTAINERS_PREFIX + env_name)
         self.assertEqual(r.status, 'created')
 
         self._commander.run(f'remove {env_name}')
 
         with self.assertRaises(docker.errors.NotFound):
-            self._client.containers.get(containers_prefix + env_name)
+            self._client.containers.get(
+                definitions.CONTAINERS_PREFIX + env_name)
 
         with self.assertRaises(docker.errors.NotFound):
             self._client.networks.get(
-                containers_prefix + env_name + '_network')
+                definitions.CONTAINERS_PREFIX + env_name + '_network')
 
         self.assertEqual(self._get_conf(), {})
 
@@ -247,7 +253,8 @@ class TestPydockenv(unittest.TestCase):
 
         for d in data:
             with self.assertRaises(docker.errors.NotFound):
-                self._client.containers.get(containers_prefix + d['env_name'])
+                self._client.containers.get(
+                    definitions.CONTAINERS_PREFIX + d['env_name'])
 
             proj_dir = self._create_project_dir(d['proj_name'])
             out = self._commander.run(
@@ -303,8 +310,6 @@ class TestPydockenv(unittest.TestCase):
             self._commander.run(
                 f"create {d['env_name']} {str(proj_dir)} --version={d['v']}")
             with self._commander.active_env(d['env_name']) as env:
-                env['PYTHONPATH'] = definitions.ROOT_DIR
-
                 os.chdir(proj_dir)
                 out = self._commander.run('run -- python --version', env=env)
                 self.assertIn(f"Python {d['v']}", out.stdout.decode('utf8'))
@@ -319,8 +324,6 @@ class TestPydockenv(unittest.TestCase):
         self._commander.run(
             f'create {env_name} {str(proj_dir)} --version={py_version}')
         with self._commander.active_env(env_name) as env:
-            env['PYTHONPATH'] = definitions.ROOT_DIR
-
             os.chdir(proj_dir)
 
             out = self._commander.run('list-packages', env=env)
