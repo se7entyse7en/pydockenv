@@ -52,8 +52,16 @@ class BaseIntegrationTest(unittest.TestCase):
                     delete_network(env_name)
                 except docker.errors.NotFound:
                     pass
+
+                self._remove_port_mappers(env_name)
         finally:
             shutil.rmtree(self._test_dir.name)
+
+    def _remove_port_mappers(self, env_name):
+        prefix = definitions.CONTAINERS_PREFIX + env_name + '_port_mapper_'
+        for c in Client.get_instance().containers.list(all=True):
+            if c.name.startswith(prefix):
+                c.remove(force=True)
 
     def _env_name(self):
         env_name = self._create_env_name(self._env_index)
