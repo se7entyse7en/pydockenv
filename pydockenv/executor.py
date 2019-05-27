@@ -73,8 +73,9 @@ class Executor:
 
     @classmethod
     def _run_port_mapper(cls, container, ports):
-        guest_ip = container.attrs[
-            'NetworkSettings']['Networks']['bridge']['IPAddress']
+        network_name = f'{container.name}_network'
+        guest_ip = container.attrs['NetworkSettings']['Networks'][
+            network_name]['IPAddress']
         containers_names = []
         for port in ports:
             # TODO: Use a single container for all port mappings instead of
@@ -86,7 +87,8 @@ class Executor:
                 'ports': {'1234': f'{port}/tcp'},
                 'name': name,
                 'detach': True,
-                'auto_remove': True
+                'auto_remove': True,
+                'network': network_name,
             }
 
             Client.get_instance().containers.run('alpine/socat', **kwargs)
