@@ -302,11 +302,14 @@ class TestPydockenv(unittest.TestCase):
             proj_dir = self._create_project_dir(d['proj_name'])
             self._commander.run(
                 f"create {d['env_name']} {str(proj_dir)} --version={d['v']}")
-            with self._commander.active_env(f"{d['env_name']}") as env:
+            with self._commander.active_env(d['env_name']) as env:
+                env['PYTHONPATH'] = definitions.ROOT_DIR
+
                 os.chdir(proj_dir)
                 out = self._commander.run('run -- python --version', env=env)
                 self.assertIn(f"Python {d['v']}", out.stdout.decode('utf8'))
-                self._commander.deactivate_env(env=env)
+
+            os.chdir(definitions.ROOT_DIR)
 
     def test_deps_handling(self):
         env_name = self._env_name()
