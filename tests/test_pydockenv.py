@@ -303,8 +303,6 @@ class TestPydockenv(unittest.TestCase):
             self._commander.run(
                 f"create {d['env_name']} {str(proj_dir)} --version={d['v']}")
             with self._commander.active_env(d['env_name']) as env:
-                env['PYTHONPATH'] = definitions.ROOT_DIR
-
                 os.chdir(proj_dir)
                 out = self._commander.run('run -- python --version', env=env)
                 self.assertIn(f"Python {d['v']}", out.stdout.decode('utf8'))
@@ -319,8 +317,6 @@ class TestPydockenv(unittest.TestCase):
         self._commander.run(
             f'create {env_name} {str(proj_dir)} --version={py_version}')
         with self._commander.active_env(env_name) as env:
-            env['PYTHONPATH'] = definitions.ROOT_DIR
-
             os.chdir(proj_dir)
 
             out = self._commander.run('list-packages', env=env)
