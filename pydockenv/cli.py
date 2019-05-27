@@ -93,15 +93,17 @@ def shell(args):
 @cli.command()
 @click.argument('cmd')
 @click.argument('args', nargs=-1)
+@click.option('-d', '--detach', is_flag=True)
 @click.option('-e', '--env-var', multiple=True,
               help='Environment variable to set')
 @click.option('-p', '--port', multiple=True,
               help='Port to reach')
-def run(cmd, args, env_var, port):
+def run(cmd, args, detach, env_var, port):
     click.echo('Running...')
     env_vars = dict(e.split('=') for e in env_var)
     try:
-        Executor.execute(cmd, *args, env_vars=env_vars, ports=list(port))
+        Executor.execute(cmd, *args, detach=detach,
+                         env_vars=env_vars, ports=list(port))
     finally:
         click.echo('Exited!')
 

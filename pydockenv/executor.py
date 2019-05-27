@@ -36,16 +36,22 @@ class Executor:
         relative_wd = current_wd[len(host_base_wd):]
         guest_wd = f'/usr/src{relative_wd}'
 
+        detach = kwargs.get('detach')
         env_vars = cls._build_env_vars(kwargs.get('env_vars'))
-        with cls._with_mapped_ports(container, kwargs.get('ports')):
-            args = (
-                ['docker', 'exec', '-w', guest_wd, '-i', '-t'] +
-                env_vars +
+        with cls._with_mapped_ports(container, kwargs.get('ports'), detach):
+            cmd = ['docker', 'exec', '-w', guest_wd]
+            if detach:
+                cmd.append('-d')
+            else:
+                cmd.extend(['-i', '-t'])
+
+            cmd = (
+                cmd + env_vars +
                 [(definitions.CONTAINERS_PREFIX + current_env)] +
                 list(args)
             )
 
-            subprocess.check_call(args)
+            subprocess.check_call(cmd)
 
     @classmethod
     def _build_env_vars(cls, env_vars):
@@ -58,7 +64,7 @@ class Executor:
 
     @classmethod
     @contextmanager
-    def _with_mapped_ports(cls, container, ports):
+    def _with_mapped_ports(cls, container, ports, detach):
         if ports:
             port_mappers_containers_names = cls._run_port_mapper(
                 container, ports)
@@ -66,6 +72,9 @@ class Executor:
             port_mappers_containers_names = []
 
         yield
+
+        if detach:
+            return
 
         for container_name in port_mappers_containers_names:
             container = Client.get_instance().containers.get(container_name)
