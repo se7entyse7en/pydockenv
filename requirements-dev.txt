@@ -3,3 +3,4 @@ isort==4.3.16
 flake8==3.7.7
 twine==1.13.0
 tox==3.9.0
+requests==2.21.0
