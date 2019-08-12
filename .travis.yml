@@ -9,6 +9,9 @@ services:
 
 before_install:
   - pip install .
+  # For some reason if this is not done before, the image won't be pulled.
+  # This is not required when running locally.
+  - docker pull alpine/socat:latest
 
 script:
   - python -m unittest discover
