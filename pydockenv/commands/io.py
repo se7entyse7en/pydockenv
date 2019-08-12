@@ -4,9 +4,9 @@ import docker
 
 from pydockenv import definitions
 from pydockenv.client import Client
-from pydockenv.commands.environment import StateConfig
 from pydockenv.commands.environment import create_env
 from pydockenv.commands.environment import create_network
+from pydockenv.commands.environment import get_current_env
 
 
 def load(name, project_dir, input_file):
@@ -21,7 +21,7 @@ def load(name, project_dir, input_file):
 
 
 def save(name, output):
-    current_env = StateConfig.get_current_env()
+    current_env = get_current_env()
 
     click.echo(f'Saving environment {current_env}...')
 

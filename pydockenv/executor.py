@@ -9,7 +9,7 @@ import docker
 
 from pydockenv import definitions
 from pydockenv.client import Client
-from pydockenv.commands.environment import StateConfig
+from pydockenv.commands.environment import get_current_env
 
 
 class Executor:
@@ -17,7 +17,7 @@ class Executor:
     @classmethod
     def execute(cls, *args, **kwargs):
         client = Client.get_instance()
-        current_env = StateConfig.get_current_env()
+        current_env = get_current_env()
         try:
             container = client.containers.get(
                 definitions.CONTAINERS_PREFIX + current_env)

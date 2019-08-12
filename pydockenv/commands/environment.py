@@ -32,7 +32,7 @@ def create(name, project_dir, version):
 
 
 def status():
-    current_env = StateConfig.get_current_env()
+    current_env = get_current_env()
     if not current_env:
         click.echo('No active environment')
     else:
@@ -53,7 +53,7 @@ def activate(name):
 
 def deactivate():
     click.echo('Deactivating current environment...')
-    current_env = StateConfig.get_current_env()
+    current_env = get_current_env()
     try:
         container = Client.get_instance().containers.get(
             definitions.CONTAINERS_PREFIX + current_env)
@@ -88,7 +88,7 @@ def list_environments():
     }
     containers = Client.get_instance().containers.list(kwargs)
 
-    current_env = StateConfig.get_current_env()
+    current_env = get_current_env()
     envs = []
     for c in containers:
         if not c.name.startswith(definitions.CONTAINERS_PREFIX):
