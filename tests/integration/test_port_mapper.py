@@ -38,9 +38,9 @@ class TestIntegrationPortMapperCommands(BaseIntegrationTest):
             os.chdir(proj_dir)
 
             port = 8000
-            self._commander.run(
+            out = self._commander.run(
                 f'run -d -p {port} -- python -m http.server {port}', env=env)
-
+            self.assertEqual(out.returncode, 0)
             self.assertPortMapperExists(env_name, port)
 
             s = requests.Session()
@@ -61,11 +61,11 @@ class TestIntegrationPortMapperCommands(BaseIntegrationTest):
             os.chdir(proj_dir)
 
             for port in range(8000, 8003):
-                self._commander.run(
+                out = self._commander.run(
                     f'run -d -p {port} -- python -m http.server {port}',
                     env=env
                 )
-
+                self.assertEqual(out.returncode, 0)
                 self.assertPortMapperExists(env_name, port)
 
                 s = requests.Session()
