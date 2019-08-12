@@ -121,8 +121,6 @@ def remove(name):
     }
     container.remove(**kwargs)
     delete_network(name)
-    StateConfig.get_instance().remove_from_conf(
-        definitions.CONTAINERS_PREFIX + name)
     click.echo(f'Environment {name} removed!')
 
 
@@ -174,11 +172,11 @@ def create_env(image, name, project_dir):
     kwargs = {
         'command': '/bin/sh',
         'stdin_open': True,
+        'labels': {
+            'workdir': workdir
+        },
         'name': definitions.CONTAINERS_PREFIX + name,
         'mounts': mounts,
         'network': definitions.CONTAINERS_PREFIX + name + '_network',
     }
     Client.get_instance().containers.create(image, **kwargs)
-
-    StateConfig.get_instance().update_conf(
-        {definitions.CONTAINERS_PREFIX + name: {'workdir': workdir}})
