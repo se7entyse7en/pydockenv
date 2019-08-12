@@ -130,7 +130,8 @@ def create_env(image, name, project_dir):
         'command': '/bin/sh',
         'stdin_open': True,
         'labels': {
-            'workdir': workdir
+            'workdir': workdir,
+            'env_name': name,
         },
         'name': definitions.CONTAINERS_PREFIX + name,
         'mounts': mounts,
