@@ -25,7 +25,6 @@ class Executor:
             click.echo(f'Container {current_env} not found, exiting...')
             raise
 
-        # This cannot be done with docker python sdk
         host_base_wd = StateConfig.get_instance().get_env_conf(
             definitions.CONTAINERS_PREFIX + current_env)['workdir']
         current_wd = os.getcwd()
@@ -39,6 +38,7 @@ class Executor:
         detach = kwargs.get('detach')
         env_vars = cls._build_env_vars(kwargs.get('env_vars'))
         with cls._with_mapped_ports(container, kwargs.get('ports'), detach):
+            # This cannot be done with docker python sdk
             cmd = ['docker', 'exec', '-w', guest_wd]
             if detach:
                 cmd.append('-d')
