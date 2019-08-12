@@ -25,8 +25,7 @@ class Executor:
             click.echo(f'Container {current_env} not found, exiting...')
             raise
 
-        host_base_wd = StateConfig.get_instance().get_env_conf(
-            definitions.CONTAINERS_PREFIX + current_env)['workdir']
+        host_base_wd = container.labels['workdir']
         current_wd = os.getcwd()
         if not current_wd.startswith(host_base_wd):
             raise RuntimeError(
