@@ -1,4 +1,3 @@
-import json
 import os
 
 import click
@@ -10,50 +9,8 @@ from pydockenv import definitions
 from pydockenv.client import Client
 
 
-class StateConfig:
-
-    _instance = None
-
-    def __init__(self, envs_conf_path, conf_file_dir):
-        self._envs_conf_path = envs_conf_path
-        self._conf_file_dir = conf_file_dir
-        self._conf = self.get_conf()
-
-    @classmethod
-    def get_instance(cls):
-        if cls._instance is None:
-            cls._instance = cls(definitions.ENVS_CONF_PATH,
-                                definitions.CONF_FILE_DIR)
-
-        return cls._instance
-
-    @classmethod
-    def get_current_env(cls):
-        return os.environ.get('PYDOCKENV')
-
-    def get_conf(self):
-        if not self._envs_conf_path.exists():
-            return {}
-
-        with open(str(self._envs_conf_path)) as fin:
-            return json.load(fin)
-
-    def get_env_conf(self, env_name):
-        return self._conf.get(env_name, {})
-
-    def update_conf(self, conf_update):
-        self._conf.update(conf_update)
-
-        os.makedirs(str(self._conf_file_dir), exist_ok=True)
-        with open(str(self._envs_conf_path), 'w') as fout:
-            return json.dump(self._conf, fout)
-
-    def remove_from_conf(self, key):
-        self._conf.pop(key, None)
-
-        os.makedirs(str(self._conf_file_dir), exist_ok=True)
-        with open(str(self._envs_conf_path), 'w') as fout:
-            return json.dump(self._conf, fout)
+def get_current_env():
+    return os.environ.get('PYDOCKENV')
 
 
 def create(name, project_dir, version):
@@ -75,7 +32,7 @@ def create(name, project_dir, version):
 
 
 def status():
-    current_env = StateConfig.get_current_env()
+    current_env = get_current_env()
     if not current_env:
         click.echo('No active environment')
     else:
@@ -96,7 +53,7 @@ def activate(name):
 
 def deactivate():
     click.echo('Deactivating current environment...')
-    current_env = StateConfig.get_current_env()
+    current_env = get_current_env()
     try:
         container = Client.get_instance().containers.get(
             definitions.CONTAINERS_PREFIX + current_env)
@@ -121,8 +78,6 @@ def remove(name):
     }
     container.remove(**kwargs)
     delete_network(name)
-    StateConfig.get_instance().remove_from_conf(
-        definitions.CONTAINERS_PREFIX + name)
     click.echo(f'Environment {name} removed!')
 
 
@@ -133,7 +88,7 @@ def list_environments():
     }
     containers = Client.get_instance().containers.list(kwargs)
 
-    current_env = StateConfig.get_current_env()
+    current_env = get_current_env()
     envs = []
     for c in containers:
         if not c.name.startswith(definitions.CONTAINERS_PREFIX):
@@ -174,11 +129,11 @@ def create_env(image, name, project_dir):
     kwargs = {
         'command': '/bin/sh',
         'stdin_open': True,
+        'labels': {
+            'workdir': workdir
+        },
         'name': definitions.CONTAINERS_PREFIX + name,
         'mounts': mounts,
         'network': definitions.CONTAINERS_PREFIX + name + '_network',
     }
     Client.get_instance().containers.create(image, **kwargs)
-
-    StateConfig.get_instance().update_conf(
-        {definitions.CONTAINERS_PREFIX + name: {'workdir': workdir}})

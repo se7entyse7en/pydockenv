@@ -9,7 +9,7 @@ import docker
 
 from pydockenv import definitions
 from pydockenv.client import Client
-from pydockenv.commands.environment import StateConfig
+from pydockenv.commands.environment import get_current_env
 
 
 class Executor:
@@ -17,7 +17,7 @@ class Executor:
     @classmethod
     def execute(cls, *args, **kwargs):
         client = Client.get_instance()
-        current_env = StateConfig.get_current_env()
+        current_env = get_current_env()
         try:
             container = client.containers.get(
                 definitions.CONTAINERS_PREFIX + current_env)
@@ -25,9 +25,7 @@ class Executor:
             click.echo(f'Container {current_env} not found, exiting...')
             raise
 
-        # This cannot be done with docker python sdk
-        host_base_wd = StateConfig.get_instance().get_env_conf(
-            definitions.CONTAINERS_PREFIX + current_env)['workdir']
+        host_base_wd = container.labels['workdir']
         current_wd = os.getcwd()
         if not current_wd.startswith(host_base_wd):
             raise RuntimeError(
@@ -39,6 +37,7 @@ class Executor:
         detach = kwargs.get('detach')
         env_vars = cls._build_env_vars(kwargs.get('env_vars'))
         with cls._with_mapped_ports(container, kwargs.get('ports'), detach):
+            # This cannot be done with docker python sdk
             cmd = ['docker', 'exec', '-w', guest_wd]
             if detach:
                 cmd.append('-d')

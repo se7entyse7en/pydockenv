@@ -1,7 +1,8 @@
 import os
-import time
 
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 import docker
 
@@ -37,12 +38,17 @@ class TestIntegrationPortMapperCommands(BaseIntegrationTest):
             os.chdir(proj_dir)
 
             port = 8000
-            self._commander.run(
+            out = self._commander.run(
                 f'run -d -p {port} -- python -m http.server {port}', env=env)
-            time.sleep(1)
-            r = requests.get(f'http://localhost:{port}')
-            self.assertEqual(r.status_code, 200)
+            self.assertEqual(out.returncode, 0)
             self.assertPortMapperExists(env_name, port)
+
+            s = requests.Session()
+            s.mount('http://', HTTPAdapter(
+                max_retries=Retry(connect=3, backoff_factor=1)))
+            r = s.get(f'http://localhost:{port}')
+
+            self.assertEqual(r.status_code, 200)
 
     def test_port_mapping_multi_ports(self):
         env_name = self._env_name()
@@ -55,11 +61,16 @@ class TestIntegrationPortMapperCommands(BaseIntegrationTest):
             os.chdir(proj_dir)
 
             for port in range(8000, 8003):
-                self._commander.run(
+                out = self._commander.run(
                     f'run -d -p {port} -- python -m http.server {port}',
                     env=env
                 )
-                time.sleep(1)
-                r = requests.get(f'http://localhost:{port}')
-                self.assertEqual(r.status_code, 200)
+                self.assertEqual(out.returncode, 0)
                 self.assertPortMapperExists(env_name, port)
+
+                s = requests.Session()
+                s.mount('http://', HTTPAdapter(
+                    max_retries=Retry(connect=3, backoff_factor=1)))
+                r = s.get(f'http://localhost:{port}')
+
+                self.assertEqual(r.status_code, 200)

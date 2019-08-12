@@ -1,4 +1,3 @@
-import json
 import os
 import shutil
 import unittest
@@ -29,15 +28,11 @@ class BaseIntegrationTest(unittest.TestCase):
     def setUp(self):
         self._cwd = os.getcwd()
         self._test_dir = Path(definitions.ROOT_DIR, '.test-dir')
-        self._conf_dir = Path(str(self._test_dir), 'conf')
         self._projs_dir = Path(str(self._test_dir), 'projs')
 
-        self._commander = Commander(env={
-            'PYDOCKENV_CONF_FILE_DIR': str(self._conf_dir)
-        })
+        self._commander = Commander()
 
         self._env_index = 1
-        os.makedirs(str(self._conf_dir))
         os.makedirs(str(self._projs_dir))
 
     def tearDown(self):
@@ -76,8 +71,3 @@ class BaseIntegrationTest(unittest.TestCase):
         proj_dir = Path(str(self._projs_dir), proj_name)
         os.makedirs(str(proj_dir))
         return proj_dir
-
-    def _get_conf(self):
-        conf_file_dir = Path(str(self._conf_dir), 'envs.json')
-        with open(str(conf_file_dir)) as fin:
-            return json.load(fin)
