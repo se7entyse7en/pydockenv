@@ -1,4 +1,7 @@
+import subprocess
+
 import click
+import toml
 
 import docker
 
@@ -7,6 +10,7 @@ from pydockenv.client import Client
 from pydockenv.commands.environment import create_env
 from pydockenv.commands.environment import create_network
 from pydockenv.commands.environment import get_current_env
+from pydockenv.executor import Executor
 
 
 def load(name, project_dir, input_file):
@@ -31,6 +35,55 @@ def save(name, output):
     click.echo(f'Removing image {image_name}...')
     Client.get_instance().images.remove(image_name)
     click.echo(f'Image {image_name} removed')
+
+
+def export(output):
+    client = Client.get_instance()
+    current_env = get_current_env()
+    try:
+        container = client.containers.get(
+            definitions.CONTAINERS_PREFIX + current_env)
+    except docker.errors.NotFound:
+        click.echo(f'Container {current_env} not found, exiting...')
+        raise
+
+    click.echo(f'Exporting environment {current_env}...')
+
+    out = Executor.execute_for_container(
+        container, 'pip', 'freeze', subprocess_kwargs={
+            'stdout': subprocess.PIPE, 'stderr': subprocess.PIPE
+        })
+
+    deps = dict(r.split('==') for r in out.stdout.decode('utf8').splitlines())
+
+    # TODO: this is a hacky way to get the python version. One way to achieve
+    # this could be to add a label to the initial image. But this requires
+    # rebuilding the image with the new label as it's not possible to add a
+    # label to an already built image.
+    out = Executor.execute_for_container(
+        container, 'python', '--version', subprocess_kwargs={
+            'stdout': subprocess.PIPE, 'stderr': subprocess.PIPE
+        })
+
+    python_version = out.stdout.strip().decode('utf8').split(' ')[1]
+
+    toml_doc = {
+        'tool': {
+            'pydockenv': {
+                'name': current_env,
+                'python': python_version,
+                'dependencies': deps
+            }
+        }
+    }
+
+    if not output:
+        click.echo(toml.dumps(toml_doc))
+    else:
+        with open(output, 'w') as fout:
+            toml.dump(toml_doc, fout)
+
+    click.echo(f'Environment {current_env} exported!')
 
 
 def _commit(name, current_env):

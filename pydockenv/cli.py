@@ -81,6 +81,12 @@ def save(name, output):
 
 
 @cli.command()
+@click.option('--output', help='Name of the output file')
+def export(output):
+    io.export(output)
+
+
+@cli.command()
 @click.argument('args', nargs=-1)
 def shell(args):
     click.echo('Running...')
