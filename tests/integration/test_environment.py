@@ -12,9 +12,10 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
         env_name = self._env_name()
         proj_name, py_version = 'test-proj', '3.7'
 
+        cont_name = definitions.CONTAINERS_PREFIX + env_name
+
         with self.assertRaises(docker.errors.NotFound):
-            self._client.containers.get(
-                definitions.CONTAINERS_PREFIX + env_name)
+            self._client.containers.get(cont_name)
 
         proj_dir = self._create_project_dir(proj_name)
         out = self._commander.run(
@@ -26,12 +27,10 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
         self.assertEqual(out.returncode, 0)
         self.assertIn(expected, out.stdout.decode('utf8'))
 
-        r = self._client.containers.get(
-            definitions.CONTAINERS_PREFIX + env_name)
+        r = self._client.containers.get(cont_name)
         self.assertEqual(r.status, 'created')
 
-        r = self._low_level_client.inspect_container(
-            definitions.CONTAINERS_PREFIX + env_name)
+        r = self._low_level_client.inspect_container(cont_name)
         self.assertEqual(len(r['Mounts']), 1)
 
         expected = {
@@ -45,85 +44,37 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
         actual = r['Mounts'][0]
         self.assertEqual(expected, actual)
 
-        expected = {f'{definitions.CONTAINERS_PREFIX}{env_name}_network'}
+        expected = {f'{cont_name}_network'}
         actual = set(r['NetworkSettings']['Networks'].keys())
         self.assertEqual(expected, actual)
 
-        conf = self._get_conf()
-
-        container_name = f'{definitions.CONTAINERS_PREFIX}{env_name}'
-        expected = {
-            container_name: {
-                'workdir': str(Path(self._projs_dir, proj_name))
-            }
-        }
-        self.assertEqual(conf, expected)
-
-    def test_multi_create(self):
-        data = [
-            {
-                'env_name': self._env_name(),
-                'proj_name': 'test-proj-1',
-                'v': '3.7',
-            },
-            {
-                'env_name': self._env_name(),
-                'proj_name': 'test-proj-2',
-                'v': '3.6',
-            },
-            {
-                'env_name': self._env_name(),
-                'proj_name': 'test-proj-3',
-                'v': '2.7',
-            },
-        ]
-
-        for d in data:
-            with self.assertRaises(docker.errors.NotFound):
-                self._client.containers.get(
-                    definitions.CONTAINERS_PREFIX + d['env_name'])
-
-            proj_dir = self._create_project_dir(d['proj_name'])
-            self._commander.run(
-                f"create {d['env_name']} {str(proj_dir)} --version={d['v']}"
-            )
-
-        conf = self._get_conf()
-        expected = {
-            f"{definitions.CONTAINERS_PREFIX}{d['env_name']}": {
-                'workdir': str(Path(self._projs_dir, d['proj_name']))
-            } for d in data
-        }
-
-        self.assertEqual(conf, expected)
+        expected = {'workdir': str(Path(self._projs_dir, proj_name))}
+        actual = r['Config']['Labels']
+        self.assertEqual(expected, actual)
 
     def test_remove(self):
         env_name = self._env_name()
         proj_name, py_version = 'test-proj', '3.7'
 
+        cont_name = definitions.CONTAINERS_PREFIX + env_name
+
         with self.assertRaises(docker.errors.NotFound):
-            self._client.containers.get(
-                definitions.CONTAINERS_PREFIX + env_name)
+            self._client.containers.get(cont_name)
 
         proj_dir = self._create_project_dir(proj_name)
         self._commander.run(
             f'create {env_name} {str(proj_dir)} --version={py_version}')
 
-        r = self._client.containers.get(
-            definitions.CONTAINERS_PREFIX + env_name)
+        r = self._client.containers.get(cont_name)
         self.assertEqual(r.status, 'created')
 
         self._commander.run(f'remove {env_name}')
 
         with self.assertRaises(docker.errors.NotFound):
-            self._client.containers.get(
-                definitions.CONTAINERS_PREFIX + env_name)
+            self._client.containers.get(cont_name)
 
         with self.assertRaises(docker.errors.NotFound):
-            self._client.networks.get(
-                definitions.CONTAINERS_PREFIX + env_name + '_network')
-
-        self.assertEqual(self._get_conf(), {})
+            self._client.networks.get(f'{cont_name}_network')
 
     def test_activate(self):
         env_name = self._env_name()
