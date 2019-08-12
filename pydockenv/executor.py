@@ -21,7 +21,7 @@ class Executor:
         try:
             container = client.containers.get(
                 definitions.CONTAINERS_PREFIX + current_env)
-        except docker.errors.ImageNotFound:
+        except docker.errors.NotFound:
             click.echo(f'Container {current_env} not found, exiting...')
             raise
 
@@ -89,17 +89,25 @@ class Executor:
             # TODO: Use a single container for all port mappings instead of
             # spinning a container for each port
             name = f'{container.name}_port_mapper_{port}'
-            cmd = f'TCP-LISTEN:1234,fork TCP-CONNECT:{guest_ip}:{port}'
-            kwargs = {
-                'command': cmd,
-                'ports': {'1234': f'{port}/tcp'},
-                'name': name,
-                'detach': True,
-                'auto_remove': True,
-                'network': network_name,
-            }
+            client = Client.get_instance()
 
-            Client.get_instance().containers.run('alpine/socat', **kwargs)
+            try:
+                container = client.containers.get(name)
+            except docker.errors.NotFound:
+                cmd = f'TCP-LISTEN:1234,fork TCP-CONNECT:{guest_ip}:{port}'
+                kwargs = {
+                    'command': cmd,
+                    'ports': {'1234': f'{port}/tcp'},
+                    'name': name,
+                    'detach': True,
+                    'auto_remove': True,
+                    'network': network_name,
+                }
+
+                client.containers.run('alpine/socat', **kwargs)
+            else:
+                container.start()
+
             containers_names.append(name)
 
         return containers_names
