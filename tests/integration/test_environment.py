@@ -47,7 +47,10 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
         actual = set(r['NetworkSettings']['Networks'].keys())
         self.assertEqual(expected, actual)
 
-        expected = {'workdir': str(Path(self._projs_dir, proj_name))}
+        expected = {
+            'env_name': env_name,
+            'workdir': str(Path(self._projs_dir, proj_name))
+        }
         actual = r['Config']['Labels']
         self.assertEqual(expected, actual)
 
