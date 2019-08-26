@@ -44,17 +44,17 @@ Let's start by creating an environment!
 
 To create an environment run the following command:
 ```
-pydockenv create <env name> <project directory>
+pydockenv create --name=<env name> <project directory>
 ```
 
 For example, if you are in the root of a project named `awesome-project` this could be:
 ```
-pydockenv create awesome-project .
+pydockenv create --name=awesome-project .
 ```
 
 This will create a Docker container with the latest Python version installed! If you want to create an environment with a specific Python version you only just need to add the `--version=<python version>` to the previous command:
 ```
-pydockenv create awesome-project . --version=3.6
+pydockenv create --name=awesome-project --version=3.6 .
 ```
 
 As you may have noticed, to create the environment you have to set a project directory. This means that everything that is not inside the project directory is completely invisible to the environment. For example, you cannot access a Python script that resides outside your project directory. See the details in the [Advanced](#advanced) section.
