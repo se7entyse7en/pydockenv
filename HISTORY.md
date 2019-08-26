@@ -1,6 +1,6 @@
 # HISTORY
 
-## Unreleased
+## [v0.4.1 - 2019-08-26](https://github.com/se7entyse7en/pydockenv/compare/v0.4.0...v0.4.1)
 
 ### Added
 
