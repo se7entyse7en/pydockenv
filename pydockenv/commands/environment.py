@@ -1,20 +1,30 @@
 import os
 
 import click
+import toml
 
 import docker
 from docker.types import Mount
 
 from pydockenv import definitions
 from pydockenv.client import Client
+from pydockenv.commands import dependency
 
 
 def get_current_env():
     return os.environ.get('PYDOCKENV')
 
 
-def create(name, project_dir, version):
-    version = version or 'latest'
+def create(project_dir, file_, name, version):
+    if file_:
+        config = toml.load(file_)['tool']['pydockenv']
+        name = name or config['name']
+        version = config['python']
+        deps = config['dependencies']
+    else:
+        version = version or 'latest'
+        deps = {}
+
     click.echo(f'Creating environment {name} with python version {version}...')
     image_name = f'python:{version}'
 
@@ -26,7 +36,7 @@ def create(name, project_dir, version):
         image = client.images.pull('python', tag=version)
 
     create_network(name)
-    create_env(image, name, project_dir)
+    create_env(image, name, project_dir, deps)
 
     click.echo(f'Environment {name} with python version {version} created!')
 
@@ -121,7 +131,7 @@ def delete_network(env_name):
     network.remove()
 
 
-def create_env(image, name, project_dir):
+def create_env(image, name, project_dir, deps):
     workdir = os.path.abspath(project_dir)
     mounts = [
         Mount('/usr/src', workdir, type='bind')
@@ -137,4 +147,15 @@ def create_env(image, name, project_dir):
         'mounts': mounts,
         'network': definitions.CONTAINERS_PREFIX + name + '_network',
     }
-    Client.get_instance().containers.create(image, **kwargs)
+
+    container = Client.get_instance().containers.create(image, **kwargs)
+
+    if deps:
+        container.start()
+
+        click.echo(f'Installing {len(deps)} dependencies...')
+        packages = [f'{dep}=={v}' for dep, v in deps.items()]
+        click.echo(f'Installing {packages}...')
+        dependency.install_for_container(container, packages, None)
+
+        container.stop()
