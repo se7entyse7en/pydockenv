@@ -59,6 +59,33 @@ pydockenv create awesome-project . --version=3.6
 
 As you may have noticed, to create the environment you have to set a project directory. This means that everything that is not inside the project directory is completely invisible to the environment. For example, you cannot access a Python script that resides outside your project directory. See the details in the [Advanced](#advanced) section.
 
+#### Creating an environment from a `*.toml` file
+
+Alternatively, you can use a `*.toml` file describing your environment. This is analogous to having a `requirements.txt` file. This file describes both the dependencies and the python version to use, for example:
+```
+[tool.pydockenv]
+name = "awesome-project"
+python = "3.7.4"
+
+[tool.pydockenv.dependencies]
+requests = "2.22.0"
+```
+
+Let's say that this is the content of a `pydockenv.toml` file in the current working directory. You can then create the environment as follows:
+```
+pydockenv create --file=pydockenv.toml <project directory>
+```
+
+You can eventually create it with a different name still using the `--name` flag:
+```
+pydockenv create --file=pydockenv.toml --name=another-awesome-project <project directory>
+```
+
+The `*.toml` file can be automatically created from an already existing environment by running:
+```
+pydockenv export --output=pydockenv.toml
+```
+
 ### Activation and packages installation
 
 Now you can activate your newly created environment!
