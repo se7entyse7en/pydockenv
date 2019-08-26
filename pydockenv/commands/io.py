@@ -54,7 +54,11 @@ def export(output):
             'stdout': subprocess.PIPE, 'stderr': subprocess.PIPE
         })
 
-    deps = dict(r.split('==') for r in out.stdout.decode('utf8').splitlines())
+    deps = {
+        k: f'=={v}' for k, v in (
+            r.split('==') for r in out.stdout.decode('utf8').splitlines()
+        )
+    }
 
     # TODO: this is a hacky way to get the python version. One way to achieve
     # this could be to add a label to the initial image. But this requires

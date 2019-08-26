@@ -156,7 +156,7 @@ def create_env(image, name, project_dir, deps):
         container.start()
 
         click.echo(f'Installing {len(deps)} dependencies...')
-        packages = [f'{dep}=={v}' for dep, v in deps.items()]
+        packages = [f'{dep}{v}' for dep, v in deps.items()]
         click.echo(f'Installing {packages}...')
         dependency.install_for_container(container, packages, None)
 
