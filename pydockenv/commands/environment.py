@@ -8,7 +8,6 @@ from docker.types import Mount
 
 from pydockenv import definitions
 from pydockenv.client import Client
-from pydockenv.commands import dependency
 
 
 def get_current_env():
@@ -151,6 +150,9 @@ def create_env(image, name, project_dir, deps):
     container = Client.get_instance().containers.create(image, **kwargs)
 
     if deps:
+        # TODO: Remove this from here just to avoid circular imports
+        from pydockenv.commands import dependency
+
         container.start()
 
         click.echo(f'Installing {len(deps)} dependencies...')
