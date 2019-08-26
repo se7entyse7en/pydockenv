@@ -68,8 +68,10 @@ name = "awesome-project"
 python = "3.7.4"
 
 [tool.pydockenv.dependencies]
-requests = "2.22.0"
+requests = ">=2.22.0"
 ```
+
+*All the version specifiers described in [PEP 440](https://www.python.org/dev/peps/pep-0440/#version-specifiers) are supported.*
 
 Let's say that this is the content of a `pydockenv.toml` file in the current working directory. You can then create the environment as follows:
 ```
