@@ -33,14 +33,14 @@ class TestIntegrationPortMapperCommands(BaseIntegrationTest):
 
         proj_dir = self._create_project_dir(proj_name)
         self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
         with self._commander.active_env(env_name) as env:
             os.chdir(proj_dir)
 
             port = 8000
             out = self._commander.run(
                 f'run -d -p {port} -- python -m http.server {port}', env=env)
-            self.assertEqual(out.returncode, 0)
+            self.assertCommandOk(out)
             self.assertPortMapperExists(env_name, port)
 
             s = requests.Session()
@@ -48,7 +48,7 @@ class TestIntegrationPortMapperCommands(BaseIntegrationTest):
                 max_retries=Retry(connect=3, backoff_factor=1)))
             r = s.get(f'http://localhost:{port}')
 
-            self.assertEqual(r.status_code, 200)
+            self.assertEqual(r.status_code, 200, msg=r.content)
 
     def test_port_mapping_multi_ports(self):
         env_name = self._env_name()
@@ -56,7 +56,7 @@ class TestIntegrationPortMapperCommands(BaseIntegrationTest):
 
         proj_dir = self._create_project_dir(proj_name)
         self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
         with self._commander.active_env(env_name) as env:
             os.chdir(proj_dir)
 
@@ -65,7 +65,7 @@ class TestIntegrationPortMapperCommands(BaseIntegrationTest):
                     f'run -d -p {port} -- python -m http.server {port}',
                     env=env
                 )
-                self.assertEqual(out.returncode, 0)
+                self.assertCommandOk(out)
                 self.assertPortMapperExists(env_name, port)
 
                 s = requests.Session()
@@ -73,4 +73,4 @@ class TestIntegrationPortMapperCommands(BaseIntegrationTest):
                     max_retries=Retry(connect=3, backoff_factor=1)))
                 r = s.get(f'http://localhost:{port}')
 
-                self.assertEqual(r.status_code, 200)
+                self.assertEqual(r.status_code, 200, msg=r.content)

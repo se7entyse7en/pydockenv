@@ -3,14 +3,28 @@ import click
 from pydockenv.executor import Executor
 
 
-def install(package, requirements_file):
+def _build_install_args(packages, requirements_file):
+    if not isinstance(packages, list):
+        packages = [packages]
+
     args = ['pip', 'install']
     if requirements_file:
         args.extend(['-r', requirements_file])
     else:
-        args.append(package)
+        args.extend(packages)
 
-    return Executor.execute(*args)
+    return args
+
+
+def install(packages, requirements_file):
+    return Executor.execute(
+        *_build_install_args(packages, requirements_file))
+
+
+def install_for_container(container, packages, requirements_file):
+    return Executor.execute_for_container(
+        container, *_build_install_args(packages, requirements_file),
+        bypass_check=True)
 
 
 def uninstall(package, yes):

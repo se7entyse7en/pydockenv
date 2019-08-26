@@ -12,11 +12,12 @@ def cli():
 
 
 @cli.command()
-@click.argument('name')
 @click.argument('project_dir')
+@click.option('--file', 'file_', help='Toml file')
+@click.option('--name', help='Name of the environment')
 @click.option('--version', help='Python version')
-def create(name, project_dir, version):
-    environment.create(name, project_dir, version)
+def create(project_dir, file_, name, version):
+    environment.create(project_dir, file_, name, version)
 
 
 @cli.command()
@@ -78,6 +79,12 @@ def load(name, project_dir, input_file):
 @click.option('--output', help='Name of the output file')
 def save(name, output):
     io.save(name, output)
+
+
+@cli.command()
+@click.option('--output', help='Name of the output file')
+def export(output):
+    io.export(output)
 
 
 @cli.command()

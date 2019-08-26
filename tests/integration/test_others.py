@@ -28,12 +28,14 @@ class TestIntegrationOtherCommands(BaseIntegrationTest):
         for d in data:
             proj_dir = self._create_project_dir(d['proj_name'])
             out = self._commander.run(
-                f"create {d['env_name']} {str(proj_dir)} --version={d['v']}")
-            self.assertEqual(out.returncode, 0)
+                f"create --name={d['env_name']} --version={d['v']} "
+                f"{str(proj_dir)}"
+            )
+            self.assertCommandOk(out)
             with self._commander.active_env(d['env_name']) as env:
                 os.chdir(proj_dir)
                 out = self._commander.run('run -- python --version', env=env)
-                self.assertEqual(out.returncode, 0)
+                self.assertCommandOk(out)
                 self.assertIn(f"Python {d['v']}", out.stdout.decode('utf8'))
 
             os.chdir(definitions.ROOT_DIR)

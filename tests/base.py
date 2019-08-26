@@ -52,6 +52,10 @@ class BaseIntegrationTest(unittest.TestCase):
         finally:
             shutil.rmtree(self._test_dir.name)
 
+    def assertCommandOk(self, command_out):
+        self.assertEqual(command_out.returncode, 0,
+                         msg=command_out.stderr.decode('utf8'))
+
     def _remove_port_mappers(self, env_name):
         prefix = definitions.CONTAINERS_PREFIX + env_name + '_port_mapper_'
         for c in Client.get_instance().containers.list(all=True):

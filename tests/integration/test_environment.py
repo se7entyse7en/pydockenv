@@ -19,8 +19,8 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
 
         proj_dir = self._create_project_dir(proj_name)
         out = self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
-        self.assertEqual(out.returncode, 0)
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
+        self.assertCommandOk(out)
 
         expected = (f'Environment {env_name} with python version '
                     f'{py_version} created!')
@@ -47,7 +47,10 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
         actual = set(r['NetworkSettings']['Networks'].keys())
         self.assertEqual(expected, actual)
 
-        expected = {'workdir': str(Path(self._projs_dir, proj_name))}
+        expected = {
+            'env_name': env_name,
+            'workdir': str(Path(self._projs_dir, proj_name))
+        }
         actual = r['Config']['Labels']
         self.assertEqual(expected, actual)
 
@@ -62,14 +65,14 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
 
         proj_dir = self._create_project_dir(proj_name)
         out = self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
-        self.assertEqual(out.returncode, 0)
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
+        self.assertCommandOk(out)
 
         r = self._client.containers.get(cont_name)
         self.assertEqual(r.status, 'created')
 
         out = self._commander.run(f'remove {env_name}')
-        self.assertEqual(out.returncode, 0)
+        self.assertCommandOk(out)
 
         with self.assertRaises(docker.errors.NotFound):
             self._client.containers.get(cont_name)
@@ -83,8 +86,8 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
         proj_dir = self._create_project_dir(proj_name)
 
         out = self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
-        self.assertEqual(out.returncode, 0)
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
+        self.assertCommandOk(out)
         env_diff = self._commander.activate_env(f'{env_name}')
 
         self.assertTrue({'PYDOCKENV', 'PYDOCKENV_DEBUG', 'PS1', 'SHLVL'} <=
@@ -101,8 +104,8 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
         proj_dir = self._create_project_dir(proj_name)
 
         out = self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
-        self.assertEqual(out.returncode, 0)
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
+        self.assertCommandOk(out)
 
         with self._commander.active_env(env_name) as env:
             env_diff_post_deactivate = self._commander.deactivate_env(env=env)
@@ -116,7 +119,7 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
 
     def test_list_environments(self):
         out = self._commander.run('list-environments')
-        self.assertEqual(out.returncode, 0)
+        self.assertCommandOk(out)
 
         stdout_lines = out.stdout.decode('utf8').split('\n')
         initial_envs = set([s.strip() for s in stdout_lines if s][1:-1])
@@ -146,12 +149,13 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
 
             proj_dir = self._create_project_dir(d['proj_name'])
             out = self._commander.run(
-                f"create {d['env_name']} {str(proj_dir)} --version={d['v']}"
+                f"create --name={d['env_name']} --version={d['v']} "
+                f"{str(proj_dir)}"
             )
-            self.assertEqual(out.returncode, 0)
+            self.assertCommandOk(out)
 
         out = self._commander.run('list-environments')
-        self.assertEqual(out.returncode, 0)
+        self.assertCommandOk(out)
 
         stdout_lines = out.stdout.decode('utf8').split('\n')
         envs = set([s.strip() for s in stdout_lines if s][1:-1])
@@ -164,16 +168,16 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
         proj_dir = self._create_project_dir(proj_name)
 
         out = self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
-        self.assertEqual(out.returncode, 0)
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
+        self.assertCommandOk(out)
 
         out = self._commander.run('status')
-        self.assertEqual(out.returncode, 0)
+        self.assertCommandOk(out)
         self.assertEqual(out.stdout.decode('utf8').strip(),
                          'No active environment')
 
         with self._commander.active_env(env_name) as env:
             out = self._commander.run('status', env=env)
-            self.assertEqual(out.returncode, 0)
+            self.assertCommandOk(out)
             self.assertEqual(out.stdout.decode('utf8').strip(),
                              f'Active environment: {env_name}')

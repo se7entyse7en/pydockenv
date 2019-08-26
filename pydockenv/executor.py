@@ -15,19 +15,14 @@ from pydockenv.commands.environment import get_current_env
 class Executor:
 
     @classmethod
-    def execute(cls, *args, **kwargs):
-        client = Client.get_instance()
-        current_env = get_current_env()
-        try:
-            container = client.containers.get(
-                definitions.CONTAINERS_PREFIX + current_env)
-        except docker.errors.NotFound:
-            click.echo(f'Container {current_env} not found, exiting...')
-            raise
-
+    def execute_for_container(cls, container, *args, **kwargs):
+        env_name = container.labels['env_name']
         host_base_wd = container.labels['workdir']
         current_wd = os.getcwd()
-        if not current_wd.startswith(host_base_wd):
+        if (
+                not current_wd.startswith(host_base_wd) and
+                not kwargs.get('bypass_check')
+        ):
             raise RuntimeError(
                 f'Cannot run commands outside of {host_base_wd}')
 
@@ -46,11 +41,24 @@ class Executor:
 
             cmd = (
                 cmd + env_vars +
-                [(definitions.CONTAINERS_PREFIX + current_env)] +
+                [(definitions.CONTAINERS_PREFIX + env_name)] +
                 list(args)
             )
 
-            subprocess.check_call(cmd)
+            return subprocess.run(cmd, **kwargs.get('subprocess_kwargs', {}))
+
+    @classmethod
+    def execute(cls, *args, **kwargs):
+        client = Client.get_instance()
+        current_env = get_current_env()
+        try:
+            container = client.containers.get(
+                definitions.CONTAINERS_PREFIX + current_env)
+        except docker.errors.NotFound:
+            click.echo(f'Container {current_env} not found, exiting...')
+            raise
+
+        return cls.execute_for_container(container, *args, **kwargs)
 
     @classmethod
     def _build_env_vars(cls, env_vars):
