@@ -19,7 +19,10 @@ class Executor:
         env_name = container.labels['env_name']
         host_base_wd = container.labels['workdir']
         current_wd = os.getcwd()
-        if not current_wd.startswith(host_base_wd):
+        if (
+                not current_wd.startswith(host_base_wd) and
+                not kwargs.get('bypass_check')
+        ):
             raise RuntimeError(
                 f'Cannot run commands outside of {host_base_wd}')
 
