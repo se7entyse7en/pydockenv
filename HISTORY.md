@@ -1,5 +1,15 @@
 # HISTORY
 
+## Unreleased
+
+### Added
+
+- Added support for version specifiers in `.toml` file
+
+### Changed
+
+- Changed the output of `export` command to include also version specifier for dependencies
+
 ## [v0.4.0 - 2019-08-26](https://github.com/se7entyse7en/pydockenv/compare/v0.3.1...v0.4.0)
 
 ### Added
