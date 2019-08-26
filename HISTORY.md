@@ -1,14 +1,33 @@
 # HISTORY
 
+## Unreleased
+
+### Added
+
+- Added `export` command to produce a `.toml` file for the current active environment.
+- Added possibiliy to create an environment from a `.toml` file.
+- Added `Executor.execute_for_container` method to execute something on a container which is not the currently active one.
+- Added possibility to bypass path check when executing commands through the `Executor` using the `bypass_check` kwarg.
+- Added function to install dependency on a container which is not the currently active one.
+- [documentation] Added explanation on how to create/export from/to a `.toml` file.
+- [internal] Added `env_name` label to each container.
+
+### Changed
+
+- Modified `commands.dependency.install` to accept multiple packages.
+- Modified `Excutor`'s methods to return `subprocess`' output.
+- The environment name has to be passed with `--name`.
+- [documentation] Modified env creation due to signature change
+
 ## [v0.3.1 - 2019-08-12](https://github.com/se7entyse7en/pydockenv/compare/v0.3.0...v0.3.1)
 
 ### Changed
 
-- Removed need of a configuration file
+- Removed need of a configuration file.
 
 ### Fixed
 
-- Fixed conflict error when a port mapper on the same port is already running
+- Fixed conflict error when a port mapper on the same port is already running.
 
 ## [v0.3.0 - 2019-05-27](https://github.com/se7entyse7en/pydockenv/compare/v0.2.3...v0.3.0)
 
