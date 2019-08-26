@@ -33,7 +33,7 @@ class TestIntegrationPortMapperCommands(BaseIntegrationTest):
 
         proj_dir = self._create_project_dir(proj_name)
         self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
         with self._commander.active_env(env_name) as env:
             os.chdir(proj_dir)
 
@@ -56,7 +56,7 @@ class TestIntegrationPortMapperCommands(BaseIntegrationTest):
 
         proj_dir = self._create_project_dir(proj_name)
         self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
         with self._commander.active_env(env_name) as env:
             os.chdir(proj_dir)
 

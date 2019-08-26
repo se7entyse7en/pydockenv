@@ -19,7 +19,7 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
 
         proj_dir = self._create_project_dir(proj_name)
         out = self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
         self.assertCommandOk(out)
 
         expected = (f'Environment {env_name} with python version '
@@ -65,7 +65,7 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
 
         proj_dir = self._create_project_dir(proj_name)
         out = self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
         self.assertCommandOk(out)
 
         r = self._client.containers.get(cont_name)
@@ -86,7 +86,7 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
         proj_dir = self._create_project_dir(proj_name)
 
         out = self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
         self.assertCommandOk(out)
         env_diff = self._commander.activate_env(f'{env_name}')
 
@@ -104,7 +104,7 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
         proj_dir = self._create_project_dir(proj_name)
 
         out = self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
         self.assertCommandOk(out)
 
         with self._commander.active_env(env_name) as env:
@@ -149,7 +149,8 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
 
             proj_dir = self._create_project_dir(d['proj_name'])
             out = self._commander.run(
-                f"create {d['env_name']} {str(proj_dir)} --version={d['v']}"
+                f"create --name={d['env_name']} --version={d['v']} "
+                f"{str(proj_dir)}"
             )
             self.assertCommandOk(out)
 
@@ -167,7 +168,7 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
         proj_dir = self._create_project_dir(proj_name)
 
         out = self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
         self.assertCommandOk(out)
 
         out = self._commander.run('status')

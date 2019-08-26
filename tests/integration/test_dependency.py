@@ -11,7 +11,7 @@ class TestIntegrationDependencyCommands(BaseIntegrationTest):
 
         proj_dir = self._create_project_dir(proj_name)
         out = self._commander.run(
-            f'create {env_name} {str(proj_dir)} --version={py_version}')
+            f'create --name={env_name} --version={py_version} {str(proj_dir)}')
         self.assertCommandOk(out)
 
         with self._commander.active_env(env_name) as env:
