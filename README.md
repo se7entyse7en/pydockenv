@@ -16,7 +16,11 @@ To install `pydockenv` run the following:
 pip install --user pydockenv
 ```
 
-To avoid conflicts this installs `pydockenv` to the Python user install directory. In order to run the `pydockenv` binary, you will need to have that directory in your `PATH`.
+To avoid conflicts this installs `pydockenv` to the Python user install directory. In order to run the `pydockenv` binary, you will need to have that directory in your `PATH`. You can do this by running these lines:
+```
+export PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')
+export PATH=$PY_USER_BIN:$PATH
+```
 
 `pydockenv` supports only python >=3.6 at the moment and will use the `python` binary. In case your system has another version installed, you can use a different interpreter by specifying its path through the `PYDOCKENV_INTERPRETER` environment variable:
 ```
