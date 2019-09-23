@@ -20,9 +20,11 @@ def create(project_dir, file_, name, version):
         name = name or config['name']
         version = config['python']
         deps = config['dependencies']
+        container_args = config['container_args']
     else:
         version = version or 'latest'
         deps = {}
+        container_args = {}
 
     click.echo(f'Creating environment {name} with python version {version}...')
     image_name = f'python:{version}'
@@ -35,7 +37,7 @@ def create(project_dir, file_, name, version):
         image = client.images.pull('python', tag=version)
 
     create_network(name)
-    create_env(image, name, project_dir, deps)
+    create_env(image, name, project_dir, deps, container_args)
 
     click.echo(f'Environment {name} with python version {version} created!')
 
@@ -130,7 +132,7 @@ def delete_network(env_name):
     network.remove()
 
 
-def create_env(image, name, project_dir, deps):
+def create_env(image, name, project_dir, deps, container_args):
     workdir = os.path.abspath(project_dir)
     mounts = [
         Mount('/usr/src', workdir, type='bind')
@@ -146,6 +148,10 @@ def create_env(image, name, project_dir, deps):
         'mounts': mounts,
         'network': definitions.CONTAINERS_PREFIX + name + '_network',
     }
+
+    filtered_container_args = {k: v for k, v in container_args.items()
+                               if k not in kwargs}
+    kwargs.update(filtered_container_args)
 
     container = Client.get_instance().containers.create(image, **kwargs)
 
