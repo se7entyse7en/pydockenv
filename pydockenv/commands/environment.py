@@ -1,3 +1,4 @@
+import json
 import os
 from dataclasses import dataclass
 from dataclasses import field
@@ -23,6 +24,7 @@ class EnvironmentConfig:
     python: str = 'latest'
     dependencies: Dict[str, str] = field(default_factory=dict)
     container_args: Dict[str, str] = field(default_factory=dict)
+    aliases: Dict[str, Dict[str, str]] = field(default_factory=dict)
 
     @classmethod
     def from_file(cls, file_: str) -> 'EnvironmentConfig':
@@ -159,6 +161,7 @@ def create_env(image, project_dir, config):
         'labels': {
             'workdir': workdir,
             'env_name': config.name,
+            'aliases': json.dumps(config.aliases),
         },
         'name': definitions.CONTAINERS_PREFIX + config.name,
         'mounts': mounts,
