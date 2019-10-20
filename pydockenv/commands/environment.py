@@ -1,4 +1,8 @@
+import json
 import os
+from dataclasses import dataclass
+from dataclasses import field
+from typing import Dict
 
 import click
 import toml
@@ -14,32 +18,46 @@ def get_current_env():
     return os.environ.get('PYDOCKENV')
 
 
+@dataclass(frozen=True)
+class EnvironmentConfig:
+    name: str
+    python: str = 'latest'
+    dependencies: Dict[str, str] = field(default_factory=dict)
+    container_args: Dict[str, str] = field(default_factory=dict)
+    aliases: Dict[str, Dict[str, str]] = field(default_factory=dict)
+
+    @classmethod
+    def from_file(cls, file_: str) -> 'EnvironmentConfig':
+        config = toml.load(file_)['tool']['pydockenv']
+        return EnvironmentConfig(**config)
+
+
 def create(project_dir, file_, name, version):
     if file_:
-        config = toml.load(file_)['tool']['pydockenv']
-        name = name or config['name']
-        version = config['python']
-        deps = config['dependencies']
-        container_args = config['container_args']
+        config = EnvironmentConfig.from_file(file_)
     else:
-        version = version or 'latest'
-        deps = {}
-        container_args = {}
+        config = EnvironmentConfig(name, python=version or 'latest')
 
-    click.echo(f'Creating environment {name} with python version {version}...')
-    image_name = f'python:{version}'
+    create_from_config(project_dir, config)
+
+
+def create_from_config(project_dir: str, config: EnvironmentConfig):
+    click.echo(f'Creating environment {config.name} with python version '
+               f'{config.python}...')
+    image_name = f'python:{config.python}'
 
     client = Client.get_instance()
     try:
         image = client.images.get(image_name)
     except docker.errors.ImageNotFound:
         click.echo(f'Image {image_name} not found, pulling...')
-        image = client.images.pull('python', tag=version)
+        image = client.images.pull('python', tag=config.python)
 
-    create_network(name)
-    create_env(image, name, project_dir, deps, container_args)
+    create_network(config.name)
+    create_env(image, project_dir, config)
 
-    click.echo(f'Environment {name} with python version {version} created!')
+    click.echo(f'Environment {config.name} with python version '
+               f'{config.python} created!')
 
 
 def status():
@@ -132,7 +150,7 @@ def delete_network(env_name):
     network.remove()
 
 
-def create_env(image, name, project_dir, deps, container_args):
+def create_env(image, project_dir, config):
     workdir = os.path.abspath(project_dir)
     mounts = [
         Mount('/usr/src', workdir, type='bind')
@@ -142,27 +160,28 @@ def create_env(image, name, project_dir, deps, container_args):
         'stdin_open': True,
         'labels': {
             'workdir': workdir,
-            'env_name': name,
+            'env_name': config.name,
+            'aliases': json.dumps(config.aliases),
         },
-        'name': definitions.CONTAINERS_PREFIX + name,
+        'name': definitions.CONTAINERS_PREFIX + config.name,
         'mounts': mounts,
-        'network': definitions.CONTAINERS_PREFIX + name + '_network',
+        'network': definitions.CONTAINERS_PREFIX + config.name + '_network',
     }
 
-    filtered_container_args = {k: v for k, v in container_args.items()
+    filtered_container_args = {k: v for k, v in config.container_args.items()
                                if k not in kwargs}
     kwargs.update(filtered_container_args)
 
     container = Client.get_instance().containers.create(image, **kwargs)
 
-    if deps:
+    if config.dependencies:
         # TODO: Remove this from here just to avoid circular imports
         from pydockenv.commands import dependency
 
         container.start()
 
-        click.echo(f'Installing {len(deps)} dependencies...')
-        packages = [f'{dep}{v}' for dep, v in deps.items()]
+        click.echo(f'Installing {len(config.dependencies)} dependencies...')
+        packages = [f'{dep}{v}' for dep, v in config.dependencies.items()]
         click.echo(f'Installing {packages}...')
         dependency.install_for_container(container, packages, None)
 

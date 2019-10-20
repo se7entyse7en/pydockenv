@@ -1,4 +1,5 @@
 import re
+import sys
 from functools import partial
 
 import setuptools
@@ -8,6 +9,11 @@ requires = [
     'Click>=7.0,<8.0',
     'docker>=3.7.0,<3.8.0',
 ]
+
+
+if sys.version_info.minor < 7:
+    requires.append('dataclasses==0.6')
+
 
 scripts = [
     'bin/pydockenv',
@@ -22,6 +28,7 @@ classifiers = [
     'Programming Language :: Unix Shell',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
     'Topic :: Software Development',
     'Topic :: Utilities'
 ]

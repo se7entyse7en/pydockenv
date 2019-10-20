@@ -49,7 +49,8 @@ class TestIntegrationEnvironmentCommands(BaseIntegrationTest):
 
         expected = {
             'env_name': env_name,
-            'workdir': str(Path(self._projs_dir, proj_name))
+            'workdir': str(Path(self._projs_dir, proj_name)),
+            'aliases': '{}',
         }
         actual = r['Config']['Labels']
         self.assertEqual(expected, actual)

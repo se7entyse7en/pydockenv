@@ -7,6 +7,7 @@ import docker
 
 from pydockenv import definitions
 from pydockenv.client import Client
+from pydockenv.commands.environment import EnvironmentConfig
 from pydockenv.commands.environment import create_env
 from pydockenv.commands.environment import create_network
 from pydockenv.commands.environment import get_current_env
@@ -19,7 +20,8 @@ def load(name, project_dir, input_file):
         image = Client.get_instance().images.load(fin)[0]
 
     create_network(name)
-    create_env(image, name, project_dir)
+    config = EnvironmentConfig(name)
+    create_env(image, project_dir, config)
 
     click.echo(f'Environment {name} loaded from {input_file}!')
 
