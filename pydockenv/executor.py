@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 from contextlib import contextmanager
@@ -57,6 +58,14 @@ class Executor:
         except docker.errors.NotFound:
             click.echo(f'Container {current_env} not found, exiting...')
             raise
+
+        if len(args) == 1:
+            aliases = container.labels.get('aliases')
+            if aliases:
+                alias = json.loads(aliases).get(args[0])
+                if alias is not None:
+                    kwargs['ports'] = alias.get('ports', [])
+                    args = alias['cmd'].split(' ')
 
         return cls.execute_for_container(container, *args, **kwargs)
 
