@@ -140,6 +140,31 @@ func Create(conf *Config) error {
 	return nil
 }
 
+func Activate(envName string) error {
+	logger := log.Logger
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return err
+	}
+
+	contName := fmt.Sprintf("%s_%s", PREFIX, envName)
+
+	ctxLogger := logger.WithFields(logrus.Fields{
+		"container-name": contName,
+	})
+	ctxLogger.Debug("Starting container...")
+
+	err = cli.ContainerStart(context.Background(), contName,
+		types.ContainerStartOptions{})
+	if err != nil {
+		return fmt.Errorf("cannot start container: %w", err)
+	}
+
+	ctxLogger.Debug("Container started!")
+
+	return nil
+}
+
 func listDockerImages(cli *client.Client) (map[string]struct{}, error) {
 	images, err := cli.ImageList(context.Background(),
 		types.ImageListOptions{All: true})
