@@ -165,6 +165,36 @@ func Activate(envName string) error {
 	return nil
 }
 
+func Deactivate() error {
+	logger := log.Logger
+
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return err
+	}
+
+	envName := getCurrentEnv()
+	contName := fmt.Sprintf("%s_%s", PREFIX, envName)
+
+	ctxLogger := logger.WithFields(logrus.Fields{
+		"container-name": contName,
+	})
+	ctxLogger.Debug("Stopping container...")
+
+	err = cli.ContainerStop(context.Background(), contName, nil)
+	if err != nil {
+		return fmt.Errorf("cannot stop container: %w", err)
+	}
+
+	ctxLogger.Debug("Container stopped!")
+
+	return nil
+}
+
+func getCurrentEnv() string {
+	return os.Getenv("PYDOCKENV")
+}
+
 func listDockerImages(cli *client.Client) (map[string]struct{}, error) {
 	images, err := cli.ImageList(context.Background(),
 		types.ImageListOptions{All: true})
