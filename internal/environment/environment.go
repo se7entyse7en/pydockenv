@@ -203,6 +203,46 @@ func Deactivate() error {
 	return nil
 }
 
+func Remove(envName string) error {
+	logger := log.Logger
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return err
+	}
+
+	contName := fmt.Sprintf("%s_%s", PREFIX, envName)
+
+	ctxLogger := logger.WithFields(logrus.Fields{
+		"container-name": contName,
+	})
+	ctxLogger.Debug("Removing container...")
+
+	err = cli.ContainerRemove(context.Background(), contName,
+		types.ContainerRemoveOptions{
+			RemoveVolumes: true,
+			Force:         true,
+		})
+	if err != nil {
+		return fmt.Errorf("cannot remove container: %w", err)
+	}
+
+	ctxLogger.Debug("Container removed!")
+
+	netName := fmt.Sprintf("%s_%s_network", PREFIX, envName)
+	ctxLogger = logger.WithFields(logrus.Fields{
+		"network-name": netName,
+	})
+
+	ctxLogger.Debug("Removing network...")
+	err = cli.NetworkRemove(context.Background(), netName)
+	if err != nil {
+		return fmt.Errorf("cannot remove network: %w", err)
+	}
+
+	ctxLogger.Debug("Network Removed!")
+	return nil
+}
+
 func getCurrentEnv() string {
 	return os.Getenv("PYDOCKENV")
 }
