@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -199,6 +200,47 @@ func Deactivate() error {
 	}
 
 	ctxLogger.Debug("Container stopped!")
+
+	return nil
+}
+
+func ListEnvironments() error {
+	logger := log.Logger
+
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return err
+	}
+
+	currentEnvName := getCurrentEnv()
+	containers, err := cli.ContainerList(
+		context.Background(), types.ContainerListOptions{All: true})
+	if err != nil {
+		return fmt.Errorf("cannot list containers: %w", err)
+	}
+
+	var msgBuilder strings.Builder
+	for _, c := range containers {
+		contName := c.Names[0]
+		if !strings.HasPrefix(contName, PREFIX) {
+			continue
+		}
+
+		envName := contName[len(PREFIX):]
+		m := fmt.Sprintf("%s\n", envName)
+		if envName == currentEnvName {
+			m = fmt.Sprintf("* %s", m)
+		}
+
+		msgBuilder.WriteString(m)
+	}
+
+	msg := msgBuilder.String()
+	if msg == "" {
+		logger.Info("No environments available")
+	} else {
+		logger.Info(msg)
+	}
 
 	return nil
 }
