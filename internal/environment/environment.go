@@ -140,6 +140,18 @@ func Create(conf *Config) error {
 	return nil
 }
 
+func Status() error {
+	logger := log.Logger
+	envName := getCurrentEnv()
+	if envName == "" {
+		logger.Info("No active environment")
+		return nil
+	}
+
+	logger.Infof("Active environment: %s", envName)
+	return nil
+}
+
 func Activate(envName string) error {
 	logger := log.Logger
 	cli, err := client.NewClientWithOpts(client.FromEnv)
