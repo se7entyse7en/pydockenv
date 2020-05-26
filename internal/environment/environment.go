@@ -15,6 +15,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/docker/pkg/term"
+	"github.com/se7entyse7en/pydockenv/internal/dependency"
 	"github.com/se7entyse7en/pydockenv/internal/utils"
 	"github.com/se7entyse7en/pydockenv/log"
 	"github.com/sirupsen/logrus"
@@ -107,7 +108,7 @@ func Create(conf *Config) error {
 		return err
 	}
 
-	_, err = cli.ContainerCreate(
+	c, err := cli.ContainerCreate(
 		context.Background(),
 		&container.Config{
 			Image:     contImg,
@@ -137,6 +138,36 @@ func Create(conf *Config) error {
 	}
 
 	ctxLogger.Debug("Container created!")
+
+	contInfo, err := cli.ContainerInspect(context.Background(), c.ID)
+	if err != nil {
+		return fmt.Errorf("cannot inspect container: %w", err)
+	}
+
+	if len(conf.Dependencies) == 0 {
+		return nil
+	}
+
+	ctxLogger.Debugf("Installing %d dependencies...", len(conf.Dependencies))
+	err = cli.ContainerStart(context.Background(), contName,
+		types.ContainerStartOptions{})
+	if err != nil {
+		return fmt.Errorf("cannot start container: %w", err)
+	}
+
+	err = dependency.InstallForContainer(contInfo, &dependency.Requirements{
+		Packages: dependency.Packages{Dependencies: conf.Dependencies},
+	})
+	if err != nil {
+		return fmt.Errorf("cannot execute command in container: %w", err)
+	}
+
+	err = cli.ContainerStop(context.Background(), contName, nil)
+	if err != nil {
+		return fmt.Errorf("cannot stop container: %w", err)
+	}
+
+	ctxLogger.Debug("Dependencies installed!")
 
 	return nil
 }
