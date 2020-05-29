@@ -15,11 +15,10 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/docker/pkg/term"
+	"github.com/se7entyse7en/pydockenv/internal/utils"
 	"github.com/se7entyse7en/pydockenv/log"
 	"github.com/sirupsen/logrus"
 )
-
-var PREFIX = "pydockenv_"
 
 type Config struct {
 	Name          string
@@ -49,6 +48,7 @@ func Create(conf *Config) error {
 	contImg := fmt.Sprintf("python:%s", conf.Python)
 	images, err := listDockerImages(cli)
 	if err != nil {
+
 		return fmt.Errorf("cannot list docker images: %w", err)
 	}
 
@@ -72,7 +72,7 @@ func Create(conf *Config) error {
 		ctxLogger.Debug("Image pulled!")
 	}
 
-	netName := fmt.Sprintf("%s_%s_network", PREFIX, conf.Name)
+	netName := fmt.Sprintf("%s_%s_network", utils.RESOURCES_PREFIX, conf.Name)
 	ctxLogger = logger.WithFields(logrus.Fields{
 		"network-name": netName,
 	})
@@ -89,7 +89,7 @@ func Create(conf *Config) error {
 
 	ctxLogger.Debug("Network created!")
 
-	contName := fmt.Sprintf("%s_%s", PREFIX, conf.Name)
+	contName := fmt.Sprintf("%s_%s", utils.RESOURCES_PREFIX, conf.Name)
 	workdir, err := filepath.Abs(conf.ProjectDir)
 	if err != nil {
 		return err
@@ -143,7 +143,7 @@ func Create(conf *Config) error {
 
 func Status() error {
 	logger := log.Logger
-	envName := getCurrentEnv()
+	envName := utils.GetCurrentEnv()
 	if envName == "" {
 		logger.Info("No active environment")
 		return nil
@@ -160,7 +160,7 @@ func Activate(envName string) error {
 		return err
 	}
 
-	contName := fmt.Sprintf("%s_%s", PREFIX, envName)
+	contName := fmt.Sprintf("%s_%s", utils.RESOURCES_PREFIX, envName)
 
 	ctxLogger := logger.WithFields(logrus.Fields{
 		"container-name": contName,
@@ -186,8 +186,8 @@ func Deactivate() error {
 		return err
 	}
 
-	envName := getCurrentEnv()
-	contName := fmt.Sprintf("%s_%s", PREFIX, envName)
+	envName := utils.GetCurrentEnv()
+	contName := fmt.Sprintf("%s_%s", utils.RESOURCES_PREFIX, envName)
 
 	ctxLogger := logger.WithFields(logrus.Fields{
 		"container-name": contName,
@@ -212,7 +212,7 @@ func ListEnvironments() error {
 		return err
 	}
 
-	currentEnvName := getCurrentEnv()
+	currentEnvName := utils.GetCurrentEnv()
 	containers, err := cli.ContainerList(
 		context.Background(), types.ContainerListOptions{All: true})
 	if err != nil {
@@ -222,11 +222,11 @@ func ListEnvironments() error {
 	var msgBuilder strings.Builder
 	for _, c := range containers {
 		contName := c.Names[0]
-		if !strings.HasPrefix(contName, PREFIX) {
+		if !strings.HasPrefix(contName, utils.RESOURCES_PREFIX) {
 			continue
 		}
 
-		envName := contName[len(PREFIX):]
+		envName := contName[len(utils.RESOURCES_PREFIX):]
 		m := fmt.Sprintf("%s\n", envName)
 		if envName == currentEnvName {
 			m = fmt.Sprintf("* %s", m)
@@ -252,7 +252,7 @@ func Remove(envName string) error {
 		return err
 	}
 
-	contName := fmt.Sprintf("%s_%s", PREFIX, envName)
+	contName := fmt.Sprintf("%s_%s", utils.RESOURCES_PREFIX, envName)
 
 	ctxLogger := logger.WithFields(logrus.Fields{
 		"container-name": contName,
@@ -270,7 +270,7 @@ func Remove(envName string) error {
 
 	ctxLogger.Debug("Container removed!")
 
-	netName := fmt.Sprintf("%s_%s_network", PREFIX, envName)
+	netName := fmt.Sprintf("%s_%s_network", utils.RESOURCES_PREFIX, envName)
 	ctxLogger = logger.WithFields(logrus.Fields{
 		"network-name": netName,
 	})
@@ -283,10 +283,6 @@ func Remove(envName string) error {
 
 	ctxLogger.Debug("Network Removed!")
 	return nil
-}
-
-func getCurrentEnv() string {
-	return os.Getenv("PYDOCKENV")
 }
 
 func listDockerImages(cli *client.Client) (map[string]struct{}, error) {
