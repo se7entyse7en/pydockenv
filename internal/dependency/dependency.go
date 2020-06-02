@@ -53,6 +53,15 @@ func Uninstall(packages *Packages, yes bool) error {
 	return nil
 }
 
+func ListPackage() error {
+	err := executor.Execute([]string{"pip", "freeze"}, &executor.ExecOptions{})
+	if err != nil {
+		return fmt.Errorf("cannot list packages in container: %w", err)
+	}
+
+	return nil
+}
+
 func buildInstallCmd(requirements *Requirements) []string {
 	cmd := []string{"pip", "install"}
 	if requirements.FileName != "" {
