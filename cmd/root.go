@@ -28,6 +28,15 @@ func getStringArg(cmd *cobra.Command, argName string) (string, error) {
 	return value, nil
 }
 
+func getStringArrayArg(cmd *cobra.Command, argName string) ([]string, error) {
+	value, err := cmd.Flags().GetStringArray(argName)
+	if err != nil {
+		return []string{}, fmt.Errorf("cannot read %s: %w", argName, err)
+	}
+
+	return value, nil
+}
+
 func getBoolArg(cmd *cobra.Command, argName string) (bool, error) {
 	value, err := cmd.Flags().GetBool(argName)
 	if err != nil {
