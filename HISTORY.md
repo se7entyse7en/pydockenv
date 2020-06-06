@@ -1,5 +1,17 @@
 # HISTORY
 
+## Unreleased
+
+### Changed
+
+- Removed commands `load`, `save` and `export` to be re-added/ported into `go` as well
+- [documentation] Updated the "Installation", "Development" and "Examples" sections of the README
+- [internal] Ported all the code from `python` to `go`:
+  - easier installation: no more issues with interpreter version used and potential packages conflict
+  - easier development setup: no meta usage
+  - deeper integration with docker
+
+
 ## [v0.5.0 - 2019-10-20](https://github.com/se7entyse7en/pydockenv/compare/v0.4.1...v0.5.0)
 
 ### Added
