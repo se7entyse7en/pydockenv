@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var VERSION = "0.5.0"
+
 var rootCmd = &cobra.Command{
 	Use:   "pydockenv",
 	Short: "A CLI tool to handle Python virtual environments",
