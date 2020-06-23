@@ -4,11 +4,6 @@ clean-compile:
 	rm -f bin/pydockenv_exec*
 clean-build:
 	rm -rf dist
-check:
-	flake8 --config .flake8
-	isort -rc -c $(git ls-tree -r HEAD --name-only | grep "\.py")
-build: clean check
-	python setup.py sdist bdist_wheel
 
 compile-linux-i686: GOOS = linux
 compile-linux-i686: GOARCH = 386
@@ -67,7 +62,7 @@ bump-patch: PART = patch
 bump-major bump-minor bump-patch:
 	bumpversion $(PART)
 
-.PHONY: clean-compile clean-build check build \
+.PHONY: clean-compile clean-build \
 	compile-linux-i686 compile-linux-x86_64 compile-darwin compile-all \
 	build-linux-i686 build-linux-x86_64 build-darwin build-all \
 	publish-check publish bump-major bump-minor bump-patch
