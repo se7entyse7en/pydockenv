@@ -27,9 +27,8 @@ classifiers = [
     'License :: OSI Approved :: Apache Software License',
     'Operating System :: Unix',
     'Programming Language :: Unix Shell',
-    'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7',
-    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 3',
     'Topic :: Software Development',
     'Topic :: Utilities',
 ]
