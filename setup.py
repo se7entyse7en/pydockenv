@@ -1,19 +1,8 @@
 import re
-import sys
 from functools import partial
 
 import setuptools
 from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-
-
-requires = [
-    'Click>=7.0,<8.0',
-    'docker>=3.7.0,<3.8.0',
-]
-
-
-if sys.version_info.minor < 7:
-    requires.append('dataclasses==0.6')
 
 
 scripts = [
@@ -86,7 +75,6 @@ setuptools.setup(
     },
     data_files=[('bin', ['bin/pydockenv_exec'])],
     include_package_data=True,
-    install_requires=requires,
     classifiers=classifiers,
     cmdclass={
         'bdist_wheel': bdist_wheel,
