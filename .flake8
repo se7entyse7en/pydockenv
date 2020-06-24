@@ -1,3 +1,2 @@
 [flake8]
 max-complexity = 10
-exclude = setup.py,.tox

@@ -1,18 +1,14 @@
 dist: xenial
-language: python
-python:
-  - "3.6"
-  - "3.7"
-  - "3.8"
-
 services:
   - docker
 
-before_install:
-  - pip install .
-  # For some reason if this is not done before, the image won't be pulled.
-  # This is not required when running locally.
-  - docker pull alpine/socat:latest
-
-script:
-  - python -m unittest discover
+matrix:
+  include:
+    - language: go
+      script: echo "TO DO"
+    - language: python
+      before_script:
+        - pip install -r requirements-dev.txt
+      script:
+        - flake8
+        - isort -rc -c -vb
