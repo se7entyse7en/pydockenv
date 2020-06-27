@@ -16,6 +16,9 @@ compile-linux-i686 compile-linux-x86_64 compile-darwin: clean-compile
 
 compile-all: compile-linux-i686 compile-linux-x86_64 compile-darwin
 
+compile-dev: clean-compile
+	go build -o bin/pydockenv_exec
+
 build-linux-i686: PLAT_NAME = manylinux1_i686
 build-linux-i686: EXEC_SUFFIX = _linux_386
 build-linux-i686: compile-linux-i686
@@ -63,6 +66,6 @@ bump-major bump-minor bump-patch:
 	bumpversion $(PART)
 
 .PHONY: clean-compile clean-build \
-	compile-linux-i686 compile-linux-x86_64 compile-darwin compile-all \
+	compile-linux-i686 compile-linux-x86_64 compile-darwin compile-all compile-dev \
 	build-linux-i686 build-linux-x86_64 build-darwin build-all \
 	publish-check publish bump-major bump-minor bump-patch
