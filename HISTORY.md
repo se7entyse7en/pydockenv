@@ -1,8 +1,8 @@
 # HISTORY
 
 ## Unreleased
--
-- ## [v0.6.0 - 2020-06-27](https://github.com/se7entyse7en/pydockenv/compare/v0.5.0...v0.6.0)
+
+## [v0.6.0 - 2020-06-27](https://github.com/se7entyse7en/pydockenv/compare/v0.5.0...v0.6.0)
 
 ### Changed
 
