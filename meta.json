@@ -1,6 +1,6 @@
 {
   "title": "pydockenv",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": "Lou Marvin Caraig",
   "author_email": "loumarvincaraig@gmail.com",
   "description": "Python Virtualenv Powered by Docker",
