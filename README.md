@@ -2,7 +2,6 @@
 
 ![Python versions](https://img.shields.io/pypi/pyversions/pydockenv.svg)
 ![Pypi](https://img.shields.io/pypi/v/pydockenv.svg)
-![Travis build](https://img.shields.io/travis/se7entyse7en/pydockenv.svg)
 ![License](https://img.shields.io/github/license/se7entyse7en/pydockenv.svg)
 
 *Notice: This project is currently in alpha stage*
@@ -11,36 +10,22 @@
 
 ## Installation
 
-To install `pydockenv` run the following:
+To install `pydockenv` simply run the following:
 ```
-pip install --user pydockenv
-```
-
-To avoid conflicts this installs `pydockenv` to the Python user install directory. In order to run the `pydockenv` binary, you will need to have that directory in your `PATH`. You can do this by running these lines:
-```
-export PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')
-export PATH=$PY_USER_BIN:$PATH
-```
-
-`pydockenv` supports only python >=3.6 at the moment and will use the `python` binary. In case your system has another version installed, you can use a different interpreter by specifying its path through the `PYDOCKENV_INTERPRETER` environment variable:
-```
-PYDOCKENV_INTERPRETER=path/to/binary pydockenv [...]
-# or
-export PYDOCKENV_INTERPRETER=path/to/binary
-pydockenv [...]
+pip install pydockenv
 ```
 
 ## Why?
 
 I assume that everybody landing here knows the great advantages that virtual environment brings. The reason I've started this project is that Docker provides even better isolation from the underlying system, and brings the advantage of being really portable across different systems.
 
-In my personal experience sometimes is difficult to replicate the same local virtual environment, and eventually save it and share it with somebody else, especially if the one you want to share the environment with runs, for example, a different operating system.
+In my personal experience sometimes it is difficult to replicate the same local virtual environment, and eventually save it and share it with somebody else, especially if the one you want to share the environment with runs, for example, a different operating system.
 
 Using Docker as the engine of the virtual environment makes the environment itself isolated, easily sharable, and also eventually ready-to-be-deployed given that it is still a Docker container.
 
 ## Quickstart
 
-The installation will provide you with the `pydockenv` binary that let you create, save, load an environment and handle its dependencies.
+The installation will provide you with the `pydockenv` binary that lets you create, save, load an environment, and handle its dependencies.
 
 Let's start by creating an environment!
 
@@ -117,7 +102,7 @@ and that's it! You can list all your environments and all the packages installed
 ```
 # list all environments
 pydockenv list-environments
-# list packages installed in current environment
+# list packages installed in the current environment
 pydockenv list-packages
 ```
 
@@ -150,27 +135,135 @@ Here are some examples that are available in the `examples` directory to show mo
 
 ### Hello World!
 
-File: `examples/hello_world.py`
+File: `examples/hello_world.py`.
 
-This first example just shows how different environments work. The script simply prints the "Hello World!" string followed by the Python version being used. You can run this on different environments and see how the output changes. See the following gif.
+This first example just shows how different environments work. The script simply prints the `Hello World!` string followed by the Python version being used. You can run this in different environments and see how the output changes.
 
-![](https://raw.githubusercontent.com/se7entyse7en/pydockenv/master/assets/hello-world.gif)
+- Environment created with Python 3.8:
+```
+✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ pydockenv create --name=hello-world --version=3.8 .
+INFO[0000] Creating virtual environment...               name=hello-world project-dir=. toml-file= version=3.8
+ERROR: You must give at least one requirement to install (see "pip help install")
+INFO[0017] Virtual environment created!                  name=hello-world project-dir=. toml-file= version=3.8
+✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ source pydockenv activate hello-world
+INFO[0000] Activating virtual environment...             name=hello-world
+INFO[0000] Virtual environment activated!                name=hello-world
+(hello-world) ✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ pydockenv run python hello_world.py
+INFO[0000] Running command...                            command="[python hello_world.py]" detach=false env-vars="map[]" ports="[]"
+Hello World!
+Python version: 3.8.3 (default, Jun  9 2020, 17:39:39)
+[GCC 8.3.0]
+INFO[0000] Command ran!                                  command="[python hello_world.py]" detach=false env-vars="map[]" ports="[]"
+```
+
+- Environment created with Python 3.7.
+```
+✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ pydockenv create --name=hello-world --version=3.7 .
+INFO[0000] Creating virtual environment...               name=hello-world project-dir=. toml-file= version=3.7
+ERROR: You must give at least one requirement to install (see "pip help install")
+INFO[0013] Virtual environment created!                  name=hello-world project-dir=. toml-file= version=3.7
+✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ source pydockenv activate hello-world
+INFO[0000] Activating virtual environment...             name=hello-world
+INFO[0000] Virtual environment activated!                name=hello-world
+(hello-world) ✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ pydockenv run python hello_world.py
+INFO[0000] Running command...                            command="[python hello_world.py]" detach=false env-vars="map[]" ports="[]"
+Hello World!
+Python version: 3.7.7 (default, Jun  9 2020, 17:58:51)
+[GCC 8.3.0]
+INFO[0000] Command ran!
+```
 
 ### Requests
 
-File: `examples/requests_get.py`
+File: `examples/requests_get.py`.
 
-This second example shows how you can install external packages and run Python scripts by passing arguments as you would do normally. See the following gif.
+This second example shows how you can install external packages and run Python scripts by passing arguments as you would do normally.
 
-![](https://raw.githubusercontent.com/se7entyse7en/pydockenv/master/assets/requests-get.gif)
+```
+✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ pydockenv create --name=requests --version=3.8 .
+INFO[0000] Creating virtual environment...               name=requests project-dir=. toml-file= version=3.8
+INFO[0001] Virtual environment created!                  name=requests project-dir=. toml-file= version=3.8
+✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ source pydockenv activate requests
+INFO[0000] Activating virtual environment...             name=requests
+INFO[0000] Virtual environment activated!                name=requests
+(requests) ✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ pydockenv install requests
+INFO[0000] Installing packages...                        file= packages="[requests]"
+Collecting requests
+  Downloading requests-2.24.0-py2.py3-none-any.whl (61 kB)
+     |████████████████████████████████| 61 kB 155 kB/s
+Collecting urllib3!=1.25.0,!=1.25.1,<1.26,>=1.21.1
+  Downloading urllib3-1.25.9-py2.py3-none-any.whl (126 kB)
+     |████████████████████████████████| 126 kB 1.2 MB/s
+Collecting idna<3,>=2.5
+  Downloading idna-2.9-py2.py3-none-any.whl (58 kB)
+     |████████████████████████████████| 58 kB 1.2 MB/s
+Collecting chardet<4,>=3.0.2
+  Downloading chardet-3.0.4-py2.py3-none-any.whl (133 kB)
+     |████████████████████████████████| 133 kB 1.4 MB/s
+Collecting certifi>=2017.4.17
+  Downloading certifi-2020.6.20-py2.py3-none-any.whl (156 kB)
+     |████████████████████████████████| 156 kB 1.4 MB/s
+Installing collected packages: urllib3, idna, chardet, certifi, requests
+Successfully installed certifi-2020.6.20 chardet-3.0.4 idna-2.9 requests-2.24.0 urllib3-1.25.9
+INFO[0005] Packages installed!                           file= packages="[requests]"
+(requests) (base) ✔ (☸|gke_athenian-1_us-east1-c_production-cluster:default) se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples (go-porting)  $ pydockenv run requests_get.py https://github.com
+INFO[0000] Running command...                            command="[requests_get.py https://github.com]" detach=false env-vars="map[]" ports="[]"
+OCI runtime exec failed: exec failed: container_linux.go:349: starting container process caused "exec: \"requests_get.py\": executable file not found in $PATH": unknown
+INFO[0000] Command ran!                                  command="[requests_get.py https://github.com]" detach=false env-vars="map[]" ports="[]"
+(requests) ✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ pydockenv run python requests_get.py https://github.com
+INFO[0000] Running command...                            command="[python requests_get.py https://github.com]" detach=false env-vars="map[]" ports="[]"
+Requested https://github.com: status code = 200
+INFO[0000] Command ran!
+```
 
 ### Flask web app
 
-File: `examples/flask_hello_world.py`
+File: `examples/flask_hello_world.py`.
 
-This third example shows how you can run a Flask web application. This example is important as it shows some caveats that make the experience of using `pydockenv` not completely identical to using a local environment. Given the environment runs inside a container, the host must be `0.0.0.0` and not `localhost`, and the port being used must be told to `pydockenv` using the `-p/--port` flag of the `run` command. See the following gif.
+This third example shows how you can run a Flask web application. This example is important as it shows some caveats that make the experience of using `pydockenv` not completely identical to using a local environment. Given the environment runs inside a container, the host must be `0.0.0.0` and not `localhost`, and the port being used must be told to `pydockenv` using the `-p/--port` flag of the `run` command.
 
-![](https://raw.githubusercontent.com/se7entyse7en/pydockenv/master/assets/flask-hello-world.gif)
+```
+✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ pydockenv create --name=flask --version=3.8 .
+INFO[0000] Creating virtual environment...               name=flask project-dir=. toml-file= version=3.8
+INFO[0000] Virtual environment created!                  name=flask project-dir=. toml-file= version=3.8
+(base) ✔ (☸|gke_athenian-1_us-east1-c_production-cluster:default) se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples (go-porting)  $ source pydockenv activate flask
+INFO[0000] Activating virtual environment...             name=flask
+INFO[0000] Virtual environment activated!                name=flask
+(flask) ✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ pydockenv install flask
+INFO[0000] Installing packages...                        file= packages="[flask]"
+Collecting flask
+  Downloading Flask-1.1.2-py2.py3-none-any.whl (94 kB)
+     |████████████████████████████████| 94 kB 359 kB/s
+Collecting itsdangerous>=0.24
+  Downloading itsdangerous-1.1.0-py2.py3-none-any.whl (16 kB)
+Collecting Werkzeug>=0.15
+  Downloading Werkzeug-1.0.1-py2.py3-none-any.whl (298 kB)
+     |████████████████████████████████| 298 kB 1.5 MB/s
+Collecting Jinja2>=2.10.1
+  Downloading Jinja2-2.11.2-py2.py3-none-any.whl (125 kB)
+     |████████████████████████████████| 125 kB 1.7 MB/s
+Collecting click>=5.1
+  Downloading click-7.1.2-py2.py3-none-any.whl (82 kB)
+     |████████████████████████████████| 82 kB 671 kB/s
+Collecting MarkupSafe>=0.23
+  Downloading MarkupSafe-1.1.1-cp38-cp38-manylinux1_x86_64.whl (32 kB)
+Installing collected packages: itsdangerous, Werkzeug, MarkupSafe, Jinja2, click, flask
+Successfully installed Jinja2-2.11.2 MarkupSafe-1.1.1 Werkzeug-1.0.1 click-7.1.2 flask-1.1.2 itsdangerous-1.1.0
+INFO[0004] Packages installed!                           file= packages="[flask]"
+(flask) ✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ pydockenv run -p 5000 python flask_hello_world.py
+INFO[0000] Running command...                            command="[python flask_hello_world.py]" detach=false env-vars="map[]" ports="[5000]"
+ * Serving Flask app "flask_hello_world" (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: on
+ * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 241-187-134
+```
+
+Now you can go to `localhost:5000` and the Flask server will respond.
 
 
 ## Commands reference
@@ -189,30 +282,20 @@ This third example shows how you can run a Flask web application. This example i
 
 ## Development
 
-To setup you environment to develop `pydockenv` run the followings:
-1. Clone the repository where you prefer:
-```
-git clone https://github.com/se7entyse7en/pydockenv.git <dir>
-```
-2. Enter in the project root directory:
-```
-cd <dir>
-```
-3. Install `pydockenv` in editable mode in another path:
-```
-export PYTHONPATH=<prefix>/lib/python3.7/site-packages
-mkdir -p <prefix>/lib/python3.7/site-packages
-pip install --prefix <prefix> -e .
-```
-I personally use `~/.local-dev` as `<prefix>`.
+To test changes locally during development you need to compile the program since it is called by a bash script. Once you have the project cloned locally you can do as follows from the root of the project:
 
-4. Rename `pydockvenv` into `dev-pydockenv` or whatever you want:
+1. create a link to `pydockenv` from `dev-pydockenv` that should be placed in a path of your choice that is included in `PATH`:
 ```
-mv <prefix>/bin/{,dev-}pydockenv
+ln -s `pwd`/bin/pydockenv /usr/local/bin/dev-pydockenv
 ```
-5. Add `<prefix>/bin` to you `$PATH`:
+2. make `dev-pydockenv` call the local compiled binary:
 ```
-export PATH=<prefix>/bin:$PATH
+export PYDOCKENV_EXEC_PATH=$(pwd)/bin
 ```
+3. compile the program:
+```
+make compile-dev
+```
+This last step has to be ran everytime a new change has to tested.
 
 Now you have `dev-pydockenv` that runs the development version of `pydockenv`!

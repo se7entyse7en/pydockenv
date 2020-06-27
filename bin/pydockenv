@@ -23,10 +23,8 @@ else
     fi
 fi
 
-python=${PYDOCKENV_INTERPRETER:-python}
-
-pydockenv_entry_point=$($python -c 'from pydockenv import cli; print(cli.__file__)')
-$python $pydockenv_entry_point $@
+pydockenv_exec_base=$(python -c 'import sys; import os; print(os.path.join(sys.prefix, "bin"))')
+${PYDOCKENV_EXEC_PATH:-$pydockenv_exec_base}/pydockenv_exec $@
 
 exitCode=$?
 if [ $exitCode -eq 0 ]
