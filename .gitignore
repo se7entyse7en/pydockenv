@@ -1,4 +1,6 @@
 ### Go ###
+bin/pydockenv_exec*
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
