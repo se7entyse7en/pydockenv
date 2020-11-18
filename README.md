@@ -206,7 +206,7 @@ Collecting certifi>=2017.4.17
 Installing collected packages: urllib3, idna, chardet, certifi, requests
 Successfully installed certifi-2020.6.20 chardet-3.0.4 idna-2.9 requests-2.24.0 urllib3-1.25.9
 INFO[0005] Packages installed!                           file= packages="[requests]"
-(requests) (base) ✔ (☸|gke_athenian-1_us-east1-c_production-cluster:default) se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples (go-porting)  $ pydockenv run requests_get.py https://github.com
+(requests) ✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ pydockenv run requests_get.py https://github.com
 INFO[0000] Running command...                            command="[requests_get.py https://github.com]" detach=false env-vars="map[]" ports="[]"
 OCI runtime exec failed: exec failed: container_linux.go:349: starting container process caused "exec: \"requests_get.py\": executable file not found in $PATH": unknown
 INFO[0000] Command ran!                                  command="[requests_get.py https://github.com]" detach=false env-vars="map[]" ports="[]"
@@ -226,7 +226,7 @@ This third example shows how you can run a Flask web application. This example i
 ✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ pydockenv create --name=flask --version=3.8 .
 INFO[0000] Creating virtual environment...               name=flask project-dir=. toml-file= version=3.8
 INFO[0000] Virtual environment created!                  name=flask project-dir=. toml-file= version=3.8
-(base) ✔ (☸|gke_athenian-1_us-east1-c_production-cluster:default) se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples (go-porting)  $ source pydockenv activate flask
+ ✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ source pydockenv activate flask
 INFO[0000] Activating virtual environment...             name=flask
 INFO[0000] Virtual environment activated!                name=flask
 (flask) ✔ se7entyse7en in ~/Projects/se7entyse7en/pydockenv/examples $ pydockenv install flask
